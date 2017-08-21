@@ -7,7 +7,7 @@
 # 项目成员
 - 「琅琊阁」，琅琊阁-小剑伯、琅琊阁-江b、琅琊阁-简小鹿
 - 「天一阁」，天一阁-冷锋、天一阁-神谕、天一阁-jack
-- 「x」队
+- 「星耀队」，星耀队-M哥、星耀队-芬达、星耀队-顺子
 
 # 文档索引
 - [[中: xx]](https://github.com/zhishutech/tech-blog-en2zh/blob/master/mysql/zh-what-s-new-mysql-replication-mysql-80.md), [[英: What’s New With MySQL Replication in MySQL 8.0]](https://github.com/zhishutech/tech-blog-en2zh/blob/master/mysql/what-s-new-mysql-replication-mysql-80.md)
