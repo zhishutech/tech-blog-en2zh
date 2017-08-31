@@ -93,7 +93,7 @@ This is because transactions may be applied in a different order than on the mas
 In addition to `expire_log_days`, a new variable has been added, `binlog_expire_log_seconds`, which allows for more fine-grained binlog rotation policy. Some additional timestamps have been added to the binary log to improve observability of replication lag, introducing microsecond granularity.
 
 
-然而，这并不是所有 MySQL 8.0 复制相关的心功能的完整列表。如果你想了解更多信息，可以查看 MySQL changelogs。以确保您已经查看到所有相关信息 —— 到目前为止，所有 8.0 版本都添加了这些特性。
+然而，这并不是所有 MySQL 8.0 复制相关的心功能的完整列表。如果你想了解更多信息，可以查看 [MySQL changelogs](https://dev.mysql.com/doc/relnotes/mysql/8.0/en/)。以确保您已经查看到所有相关信息 —— 到目前为止，所有 8.0 版本都添加了这些特性。
 >By all means, this is not a full list of changes and features related to MySQL replication. If you’d like to learn more, you can check the MySQL changelogs. Make sure you reviewed all of them - so far, features have been added in all 8.0 versions.
 
 
