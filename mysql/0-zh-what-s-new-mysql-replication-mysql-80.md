@@ -1,4 +1,14 @@
-# [MySQL 8.0 中复制的新特性](https://github.com/zhishutech/tech-blog-en2zh/blob/master/mysql/what-s-new-mysql-replication-mysql-80.md)
+# [MySQL 8.0复制新特性](https://github.com/zhishutech/tech-blog-en2zh/blob/master/mysql/what-s-new-mysql-replication-mysql-80.md)
+
+
+# 导读
+> MySQL 8.0 复制功能有很大改进提升，并行复制性能与5.7相比可能提高数倍，是不是很期待？
+>
+> 翻译团队：知数堂藏经阁项目 - 琅琊阁
+> 团队成员：琅琊阁-小剑伯、 琅琊阁-江b 、琅琊阁-简小鹿 
+> 原文出处：https://severalnines.com/blog/what-s-new-mysql-replication-mysql-80
+> 原文作者：Krzysztof Ksiazek
+> 备注：发稿时，小编发现作者修改了原文，略尴尬哈
 
 截止目前（2017年8月），MySQL 8.0 仍然是 beta 版本，复制功能有一些很棒的改进。
 
@@ -7,10 +17,15 @@
 我们这里提到的改进是存储在binlog中的依赖关系跟踪信息。MySQL 8.0 使用某种方法来存储那些受事务影响的行的相关信息（这些行被称为`writeset`），且它会比较来自不同事务中的`writesets`。这样就能识别出那些修改的数据行没有交集的事务，那么这些事务就可以在从库上被并行回放。与 MySQL 5.7 的实现相比，这也许能增加数倍的并行化程度。
 
 要注意，从库上可能会出现在主库上出现过的数据视图(比如查询数据时默认的显示顺序和在主库上查询结果不同)。这是因为事务可能被按照与主库不同的顺序去回放。当然，这其实没有什么问题。目前在 MySQL 5.7 中实现的多线程复制也可能会导致这个问题，除非您明确地启用 `slave-preserve-commit-order` 参数。
->MySQL 8.0, which as of now (August 2017) is still in beta state, brings some nice improvements to replication. Originally, it was developed for Group Replication (GR), but as GR uses regular replication under the hood, “normal” MySQL replication benefited from it. The improvement we mentioned is dependency tracking information stored in the binary log. 
+>MySQL 8.0, which as of now (August 2017) is still in beta state, brings some nice improvements to replication.
+> 
+> Originally, it was developed for Group Replication (GR), but as GR uses regular replication under the hood, “normal” MySQL replication benefited from it.
+> 
+> The improvement we mentioned is dependency tracking information stored in the binary log. 
 What happens is that MySQL 8.0 now has a way to store information about which rows were affected by a given transaction (so called writeset), and it compares writesets from different transactions. This makes it possible to identify those transactions which did not work on the same subset of rows and, therefore, these may be applied in parallel. 
 This may allow to increase the parallelization level by several times compared to the implementation from MySQL 5.7. What you need to keep in mind is that, eventually, a slave will see a different view of the data, one that never appeared on the master. 
-This is because transactions may be applied in a different order than on the master. This should not be a problem though. The current implementation of multithreaded replication in MySQL 5.7 may also cause this issue unless you explicitly enable slave-preserve-commit-order.
+> 
+> This is because transactions may be applied in a different order than on the master. This should not be a problem though. The current implementation of multithreaded replication in MySQL 5.7 may also cause this issue unless you explicitly enable slave-preserve-commit-order.
 
 
 为了控制这个新的行为（从库上数据回放顺序），新增选项：`binlog_transaction_dependency_tracking`。 它可以取三个值：
