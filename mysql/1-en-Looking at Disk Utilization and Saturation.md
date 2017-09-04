@@ -2,6 +2,8 @@
 
 作者：[Peter Zaitsev \(Percona CEO\)](https://www.percona.com/blog/author/admin/)
 
+翻译团队：菜鸟盟
+
 In this blog post, I will look at disk utilization and saturation.
 
 In my previous blog post, I wrote about CPU utilization and saturation, the practical difference between them and how different CPU utilization and saturation impact response times. Now we will look at another critical component of database performance: the storage subsystem. In this post, I will refer to the storage subsystem as “disk” (as a casual catch-all). 
