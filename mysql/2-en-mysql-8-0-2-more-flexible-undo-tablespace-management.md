@@ -1,5 +1,8 @@
 原文：[MySQL 8.0.2 More Flexible Undo Tablespace Management](http://mysqlserverteam.com/mysql-8-0-2-more-flexible-undo-tablespace-management/)
+
 作者：[Kevin Lewis](http://mysqlserverteam.com/author/kevin/)
+
+翻译团队：天一阁
 
 In MySQL 8.0.2 DMR we will introduce features which make managing undo tablespaces easier in InnoDB.
 
