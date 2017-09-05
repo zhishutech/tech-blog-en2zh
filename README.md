@@ -11,4 +11,5 @@
 - 「菜鸟盟」，菜鸟盟–hades、菜鸟盟-bruce、菜鸟盟-冰焰
 
 # 文档索引
-- [[中: MySQL 8.0 中复制的新特性]](https://github.com/zhishutech/tech-blog-en2zh/blob/master/mysql/0-zh-what-s-new-mysql-replication-mysql-80.md), [[英: What’s New With MySQL Replication in MySQL 8.0]](https://github.com/zhishutech/tech-blog-en2zh/blob/master/mysql/0-en-what-s-new-mysql-replication-mysql-80.md)
+
+- [[中: MySQL 8.0 中复制的新特性]](mysql/0-zh-what-s-new-mysql-replication-mysql-80.md), [[英: What’s New With MySQL Replication in MySQL 8.0]](mysql/0-en-what-s-new-mysql-replication-mysql-80.md)
