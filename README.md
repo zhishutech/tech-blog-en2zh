@@ -12,4 +12,6 @@
 
 # 文档索引
 
-- [[中: MySQL 8.0 中复制的新特性]](mysql/0-zh-what-s-new-mysql-replication-mysql-80.md), [[英: What’s New With MySQL Replication in MySQL 8.0]](mysql/0-en-what-s-new-mysql-replication-mysql-80.md)
+1. [[中: MySQL 8.0 中复制的新特性]](mysql/0-zh-what-s-new-mysql-replication-mysql-80.md), [[英: What’s New With MySQL Replication in MySQL 8.0]](mysql/0-en-what-s-new-mysql-replication-mysql-80.md)
+1. 中：[深入理解磁盘IO利用率及饱和度](mysql/1-zh-Looking%20at%20Disk%20Utilization%20and%20Saturation.md), 英：[Looking at Disk Utilization and Saturation](mysql/1-en-Looking%20at%20Disk%20Utilization%20and%20Saturation.md)
+1. 中：[MySQL 8.0.2中更灵活的UNDO表空间管理方式](mysql/2-zh-mysql-8-0-2-more-flexible-undo-tablespace-management.md)，英：[MySQL 8.0.2 More Flexible Undo Tablespace Management](mysql/2-en-mysql-8-0-2-more-flexible-undo-tablespace-management.md)
