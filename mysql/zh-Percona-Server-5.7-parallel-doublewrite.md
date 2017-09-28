@@ -76,12 +76,12 @@ PMP的数据看起来好点：
 buf_dblwr_flush_buffered_writes现在等待自己的线程I/O完成,并不阻塞其他线程继续。其他较高的互斥量等待属于LRU列表中的互斥量,这也不是有flush引起的。
 
 以下是对Percona Server 当前flush实现的描述。总结一下，在这些的系列文章中，我们重现了XtraDB 5.7刷新实现的风雨历程：
-在I/O密集的工作负载下，server对空闲buffer页面的需求量很大，这要求通过批量的LRU刷新，或者单个页面刷新来满足需要。
-单个页面flush会导致大量的doublewrite buffer争用，即使没开启doublewrite也是糟糕的。
-与XtraDB 5.6 相同,我们移除了单页flush。
-现有的LRU刷新机制不能满足空闲页的需求。
-多线程LRU刷新解决了这个问题——如果doublewrite buffer关闭掉。
-如果开启了doublewrite,则多线程的LRU flush会争用它,也会使得性能下降。
-并行的doublewrite buffer解决了这个问题。
+* 在I/O密集的工作负载下，server对空闲buffer页面的需求量很大，这要求通过批量的LRU刷新，或者单个页面刷新来满足需要。
+* 单个页面flush会导致大量的doublewrite buffer争用，即使没开启doublewrite也是糟糕的。
+* 与XtraDB 5.6 相同,我们移除了单页flush。
+* 现有的LRU刷新机制不能满足空闲页的需求。
+* 多线程LRU刷新解决了这个问题——如果doublewrite buffer关闭掉。
+* 如果开启了doublewrite,则多线程的LRU flush会争用它,也会使得性能下降。
+* 并行的doublewrite buffer解决了这个问题。
 
 [原文英文链接](https://www.percona.com/blog/2016/05/09/percona-server-5-7-parallel-doublewrite/)
