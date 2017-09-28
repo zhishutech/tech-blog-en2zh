@@ -49,18 +49,18 @@ if (buf_dblwr->batch_running) {
         goto try_again;
     }
 ```
-这看起来很糟糕（里面的注释可以不用关注，已经过时）。一个运行的doublewrite持续的刷新（多达120个页写入两次存储）会阻塞所有其他flush线程任何的doublewrite page添加。
+这看起来很糟糕（里面的注释可以不用关注，已经过时）。一个运行的doublewrite持续的刷新（多达120个页写入两次存储）会阻塞所有其他flush线程任何的doublewrite page添加。  
 ![Shared Double Write Buffer](https://www.percona.com/blog/wp-content/uploads/2016/04/dblw_ms_2-2.png)
 
-使用MySQL 5.7多线程flush也会出现此问题，但随着PS 5.7的多线程LRU 刷新，问题变得更加尖锐。为什么并发的flush线程必须共享单个的doublewrite buffer并没有一个官方说法。每个线程拥有私有的buffer，这样可以允许添加到buffer并单独刷新它们，这意味着大量的同步会消失.将页面添加到并行buffer完全是异步的。
+使用MySQL 5.7多线程flush也会出现此问题，但随着PS 5.7的多线程LRU 刷新，问题变得更加尖锐。为什么并发的flush线程必须共享单个的doublewrite buffer并没有一个官方说法。每个线程拥有私有的buffer，这样可以允许添加到buffer并单独刷新它们，这意味着大量的同步会消失.将页面添加到并行buffer完全是异步的。  
 ![Parallel Double Write Buffers](https://www.percona.com/blog/wp-content/uploads/2016/04/dblw_ps_1.png)
 
-这样刷新他们就：
+这样刷新他们就：  
 ![Multiple double write buffers)(https://www.percona.com/blog/wp-content/uploads/2016/04/dblw_ps_2.png)
 
-这个特性是我们在5.7.11-4版本添加的，其性能效果，在[之前的文章](https://www.percona.com/blog/2016/03/17/percona-server-5-7-performance-improvements/)中已经展示。为什么私有的doublewrite buffer会影响flush线程，让我们看下再看下这些线程的隔离数据：
+这个特性是我们在5.7.11-4版本添加的，其性能效果，在[之前的文章](https://www.percona.com/blog/2016/03/17/percona-server-5-7-performance-improvements/)中已经展示。为什么私有的doublewrite buffer会影响flush线程，让我们看下再看下这些线程的隔离数据：  
 
-Performance Schema:
+Performance Schema:  
 ![TOP performance schema synch waits](https://www.percona.com/blog/wp-content/uploads/2016/04/5711.flusher.only_.png)
 
 从PFS的角度看，redo log互斥量是当前使用量最多的争用来源，这不是直接由flush引起的。
