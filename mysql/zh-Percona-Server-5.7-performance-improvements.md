@@ -6,6 +6,7 @@
 从Percona Server 5.6发布以来，我们引入了几个重要的更新，有助于解决高并发I/O负载场景下的性能问题。我们的一些研究和改进在MySQL 5.7 —— 目前最好的MySQL版本之一被重现了。但即使MySQL 5.7在扩展性和性能等方便都有所提升，我们还是发现了可以增进I/O工作负载性能的一些地方。
 
 Percona Server 5.7.11 在这方面有两个主要的性能特性：
+
 **`多线程LRU刷新`**.这个特性在Percona Server 5.6就存在了，但当时作用有限。我们从page clean线程中分离了LRU刷新线程，现在完全只做flush list的刷新。除了其他几个重要的改变，这显著提升了I/O绑定的工作负载性能。MySQL 5.7更进一步引入了page clean 池，这将有助于提高flush的并行性。不过，我们认为目前的做法还不够好——尤其是LRU刷新上。在下一个我们介绍的Percona Server 5.7性能改进的文章中，我们将讲述MT（Multi-threaded）刷新方面的内容，以及为什么独立的MT LRU 刷新特别重要。
 **`并行doublewrite buffer`**. 长期以来，MySQL只有一个doublewrite buffer来刷新数据页。所以，即使你有多个线程进行flush，也不能有效地使用他们——doublewrite会很快成为瓶颈。我们已经通过对每个buffer pool实例附加两个doublewrite buffer进行更改：一个对应一个类型的页面刷新（LRU和flush list）。这完全避免了任何doublewrite的争用，无论flush的线程数多少。我们还将doublewrite buffer移除系统表空间，以便现在可以配置其路径。
 
@@ -61,7 +62,7 @@ skip_name_resolve=ON
 loose-performance_schema=ON
 loose-performance-schema-instrument='wait/synch/%=ON',
 ```
-###**总结**
+### **总结**
 如果你测试过MySQL 5.7，不妨再测试下Percona Server ——尤其在I/O绑定的工作负载下。我们在Percona Server 5.7的性能改进上煞费苦心。在后续发布的文章中，我们将深入了解LRU flush和doublewrite buffer变化的技术细节。
 
 [原文英文链接](https://www.percona.com/blog/2016/03/17/percona-server-5-7-performance-improvements/)  
