@@ -1,5 +1,5 @@
 >作者：Laurynas Biveinis and Alexey Stroganov  
->发布时间：2017.5.9  
+>发布时间：2016.5.9  
 >文章关键字：MySQL
 
 在这篇文章中，我们将讨论Percona Server 5.7 并行doublewrite的内部原理和外部使用。
@@ -18,7 +18,7 @@
 ```
 我们再次看到，PFS并没有显示所有的内容，这里是因为[XtraDB中缺失的注解](https://bugs.launchpad.net/percona-server/+bug/1561945)。而PFS的结果让我们忽略刷新方面的分析,转而聚焦rseg/undo/purge或者锁的检查上。PMP清晰地展现缺少空闲也是最大等待的源头。打开doublewriter buffer 会导致LRU刷新不足。然而，这些数据并没有告诉我们为什么会这样。
 
-要了解为何开启了doublewrite buffer 会是LRU刷新变得糟糕，我们收集了PFS和PMP数据，这些数据只包含刷新相关（clean coordinator，cleaner worker，以及LRU flusher）线程和I/O相关线程：
+要了解为何开启了doublewrite buffer 会使LRU刷新变得糟糕，我们收集了PFS和PMP数据，这些数据只包含刷新相关（cleaner coordinator，cleaner worker，以及LRU flusher）线程和I/O相关线程：
 ![TOP performance schema synch waits](https://www.percona.com/blog/wp-content/uploads/2016/04/5710.3.flushers.only_.png)
 
 如果我们只从整个服务放大到刷新，douoblewrite 互斥量就会显示。由于我们移除了单页刷新之间的争用，所以它必须在刷新线程批量使用doublewrite buffer时重新出现。doublewrite buffer有一个单独区域，有120个page，用来被刷新线程共享使用。将页添加到批处理操作由doublewrite 互斥量锁定，持续添加，结果如下图：
@@ -33,7 +33,7 @@
 21 pthread_cond_wait,...,PolicyMutex<TTASEventMutex<GenericPolicy>(ut0mutex.ic:89),buf_page_io_complete(buf0buf.cc:5966),fil_aio_wait(fil0fil.cc:5754),io_handler_thread(srv0start.cc:330),...
 8 pthread_cond_timedwait,...,buf_flush_page_cleaner_coordinator(buf0flu.cc:2726),...
 ```
-与之前文章中提到的单页刷新doublewrite争用，等待一个空闲的页的情景一样，这里我们有一个在Performance Schema中未被注解的doublewrite OS 事件等等（见[bug80979](http://bugs.mysql.com/bug.php?id=80979))。
+与之前文章中提到的单页刷新doublewrite争用，等待一个空闲的页的情景一样，这里我们有一个在Performance Schema中未被注解的doublewrite OS 事件（见[bug80979](http://bugs.mysql.com/bug.php?id=80979))。
 
 ```
 if (buf_dblwr->batch_running) {
@@ -73,7 +73,7 @@ PMP的数据看起来好点：
 27 pthread_cond_wait,...,buf_flush_page_cleaner_worker(buf0flu.cc:3489),...
 10 pthread_cond_wait,...,enter(ib0mutex.h:845),buf_LRU_block_free_non_file_page(ib0mutex.h:845),buf_LRU_bloc
 ```
-buf_dblwr_flush_buffered_writes现在等待自己的线程I/O完成,并不阻塞其他线程继续。其他较高的互斥量等待属于LRU列表中的互斥量,这也不是有flush引起的。
+buf_dblwr_flush_buffered_writes现在等待自己的线程I/O完成,并不阻塞其他线程继续。其他较高的互斥量等待属于LRU列表中的互斥量,这也不是由flush引起的。
 
 以下是对Percona Server 当前flush实现的描述。总结一下，在这些的系列文章中，我们重现了XtraDB 5.7刷新实现的风雨历程：
 * 在I/O密集的工作负载下，server对空闲buffer页面的需求量很大，这要求通过批量的LRU刷新，或者单个页面刷新来满足需要。
