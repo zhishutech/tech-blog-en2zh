@@ -1,6 +1,6 @@
->作者：Alexey Stroganov, Laurynas Biveinis and Vadim Tkachenko 
+>作者：Alexey Stroganov, Laurynas Biveinis and Vadim Tkachenko  
 >发布时间：2016.3.17  
->文章关键字：Benchmarks,MySQL,Percona Server  
+>文章关键字：Benchmarks,MySQL,Percona Server
 
 在这篇文章中，我们将讨论Percona Server 5.7有哪些性能提升。
 从Percona Server 5.6发布以来，我们引入了几个重要的更新，有助于解决高并发I/O负载场景下的性能问题。我们的一些研究和改进在MySQL 5.7 —— 目前最好的MySQL版本之一被重现了。但即使MySQL 5.7在扩展性和性能等方便都有所提升，我们还是发现了可以增进I/O工作负载性能的一些地方。
