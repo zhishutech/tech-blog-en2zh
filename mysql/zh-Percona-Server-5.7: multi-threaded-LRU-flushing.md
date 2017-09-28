@@ -1,6 +1,7 @@
 > 作者：Laurynas Biveinis and Alexey Stroganov    
 > 发布时间：2016.5.5    
 > 关键词：MySQL   
+
 在这篇文章中，我们会讨论怎么利用多线程LRU刷新突破MySQL的瓶颈。
 
 在[之前的文章](https://www.percona.com/blog/?p=34372)中，我们看到InnoDB 5.7执行大量的单页LRU刷新，它们又被共享的doublewrite buffer序列化。基于对5.6的经验判断，我们决定先挑战单页刷新这个问题。
