@@ -30,7 +30,7 @@ InnoDB尝试通过维护每个buffer pool实例的空闲页列表来预测这一
 
 根据上述标准，我们为每个buffer pool实例分配一个独立的LRU刷新线程，该线程监视实例中的空闲列表长度，刷新，然后sleep等待下一个空闲列表长度检查。休眠时间根据空闲列表长度进行调整：因此，为了跟上需求，一个繁忙的buffer pool实例可能根本不会休眠，而比较闲的buffer pool实例刷新可能每秒钟唤醒一次，进行一次短暂的检查。
 
-现在，LRU刷新结构如下：
+现在，LRU刷新结构如下:  
 ![Percona Server 5.7 MT LRU list flushing](https://www.percona.com/blog/wp-content/uploads/2016/03/Untitled-drawing-12.png)
 
 这是在Percona Server 5.7.10-3 RC版本，这个设计也简化了代码。LRU的启发式刷新设计也是简洁的，现在任何的LRU刷新都从以前的清理coordinator/worker线程中移除——实现了更有效的flush list刷新。LRU刷新线程是可以刷新给定buffer pool的唯一线程，还可以进一步简化：比如，取消InnoDB 恢复写入线程。
