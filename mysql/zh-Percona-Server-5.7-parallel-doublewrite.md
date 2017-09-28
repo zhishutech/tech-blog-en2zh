@@ -1,5 +1,5 @@
->作者：Laurynas Biveinis and Alexey Stroganov
->发布时间：2017.5.9
+>作者：Laurynas Biveinis and Alexey Stroganov  
+>发布时间：2017.5.9  
 >文章关键字：MySQL
 
 在这篇文章中，我们将讨论Percona Server 5.7 并行doublewrite的内部原理和外部使用。
