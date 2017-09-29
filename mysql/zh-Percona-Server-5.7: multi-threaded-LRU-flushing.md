@@ -10,7 +10,7 @@
 
 InnoDB尝试通过维护每个buffer pool实例的空闲页列表来预测这一点。这些页面是可以立即用于放置新读取的数据页的。它的页面列表的长度由`innodb_lru_scan_depth`参数控制，并且清理线程通过执行LRU批量刷新来填充此列表。如果由于某种原因空闲页面的请求超出了清理线程的处理能力，server需要找到一个空闲的列表。试图不去阻止查询线程请求一个空闲页，它将执行单页的LRU刷新（buf_LRU_get_free_block在源码中调用buf_flush_single_page_from_LRU），这是在查询线程本身的上下文中执行的。
 
-这种刷新模式的问题是，它会遍历buffer pools实例的LRU列表，同时在Innodb中持有buffer pool互斥量（或者XtraDB中更细粒度的LRU列表互斥体）。从而，当server的清理线程跟不上LRU刷新的需求就会更进一步增加互斥量的压力——这可以更进一步归功于清理线程的麻烦。最后，一旦单页刷新找到一个页可以进行刷新，它在获取空闲的doublewrite buffer槽（如前所述）也还是会遇到问题。这就告诉我们一个道理，单页刷新并不是一个好的解决方案。下面的火焰图说明了一切：
+这种刷新模式的问题是，它会遍历buffer pools实例的LRU列表，同时在Innodb中持有buffer pool互斥量（或者XtraDB中更细粒度的LRU列表互斥体）。从而，当server的清理线程跟不上LRU刷新的需求就会进一步增加互斥量之前相互争用的压力——这也可以说是清理线程自己的问题。最后，一旦单页刷新找到一个页可以进行刷新，它在获取空闲的doublewrite buffer槽（如前所述）也还是会遇到问题。这就告诉我们一个道理，单页刷新并不是一个好的解决方案。下面的火焰图说明了一切：
 
 ![Flame Graph](https://www.percona.com/blog/wp-content/uploads/2016/03/512.io_.conc0_.svg)
 
@@ -18,7 +18,7 @@ InnoDB尝试通过维护每个buffer pool实例的空闲页列表来预测这一
 
 最简单的避免单页刷新的方法是，额... 就是别去做它！等待清理线程最终提供一批空闲的页再提供给查询线程使用。这就是我们在XtraDB 5.6中添加了innodb_empty_free_list_algorithm选项（默认是"backoff"）。这个参数也存在于XtraDB 5.7，并解决了缓冲池（LRU列表）互斥量和doublewrite buffer单页刷新槽的争用问题。这种方法更好地处理了空的空闲页列表。
 
-即使采用了这种策略，还有一个糟糕的情景是，当page clean线程无法跟上空闲页面的需求，它会导致查询阻塞。让我们看下InnoDB 5.7中多线程LRU刷新的简单结构：
+即使采用了这种策略，还有一个糟糕的情景是，当page clean线程无法跟上空闲页面的需求，它会导致查询阻塞。为了理解为什么会这样，让我们看下InnoDB 5.7中多线程LRU刷新的简单结构图：
 
 ![MySQL 5.7 MT LRU+flush list flushing](https://www.percona.com/blog/wp-content/uploads/2016/03/MySQL-MT-flushing-cropped.png)
 
