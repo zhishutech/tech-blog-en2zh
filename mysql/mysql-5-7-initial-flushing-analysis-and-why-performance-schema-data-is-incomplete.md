@@ -3,7 +3,7 @@
 >文章关键字：MySQL
  
 In this post, we’ll examine why in an initial flushing analysis we find that Performance Schema data is incomplete.  
-在本文中，我们将研究为什么在最初的完整报告里面我们发现导致Performance Schema数据是不完整的原因。
+本篇文章中，我们将研究为什么在初始化flush的分析中，发现P_S数据是不完整的
 
 [Having shown the performance impact of Percona Server 5.7 patches](https://www.percona.com/blog/2016/03/17/percona-server-5-7-performance-improvements/), we can now discuss their technical reasoning and details. Let’s revisit the MySQL 5.7.11 performance schema synch wait graph from the previous [post](https://www.percona.com/blog/2016/03/17/percona-server-5-7-performance-improvements/), for the case of unlimited InnoDB concurrency:  
 [已经表明了Percona Server 5.7补丁对于性能的影响](https://www.percona.com/blog/2016/03/17/percona-server-5-7-performance-improvements/)，我们现在可以讨论它们的技术原理和细节。让我们从[上一篇文章](https://www.percona.com/blog/2016/03/17/percona-server-5-7-performance-improvements/)中回顾一下MySQL 5.7.11 performance schema同步等待图，在这个示例中不限制InnoDB的并发：
