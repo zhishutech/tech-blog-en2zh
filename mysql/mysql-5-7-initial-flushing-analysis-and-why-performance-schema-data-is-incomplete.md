@@ -7,7 +7,7 @@ In this post, we’ll examine why in an initial flushing analysis we find that P
 
 [Having shown the performance impact of Percona Server 5.7 patches](https://www.percona.com/blog/2016/03/17/percona-server-5-7-performance-improvements/), we can now discuss their technical reasoning and details. Let’s revisit the MySQL 5.7.11 performance schema synch wait graph from the previous [post](https://www.percona.com/blog/2016/03/17/percona-server-5-7-performance-improvements/), for the case of unlimited InnoDB concurrency:  
 [已经表明了Percona Server 5.7补丁对于性能的影响](https://www.percona.com/blog/2016/03/17/percona-server-5-7-performance-improvements/)，我们现在可以讨论它们的技术原理和细节。让我们从[上一篇文章](https://www.percona.com/blog/2016/03/17/percona-server-5-7-performance-improvements/)中回顾一下MySQL 5.7.11 performance schema同步等待图，在这个示例中不限制InnoDB的并发：
-![TOP 5 performance schema synch waits](https://www.percona.com/blog/wp-content/uploads/2016/03/5711.blog_.n6.v1.png)
+![TOP 5 performance schema synch waits](https://www.percona.com/blog/wp-content/uploads/2016/03/5711.blog_.n6.v1.png)  
 First of all, this graph is a little “nicer” than reality, which limits its diagnostic value. There are two reasons for this. The first one is that page cleaner worker threads are invisible to Performance Schema (see [bug 79894](http://bugs.mysql.com/bug.php?id=79894)). This alone limits PFS value in 5.7 if, for example, one tries to select only the events in the page cleaner threads or monitors low concurrency where the cleaner thread count is non-negligible part of the total threads.  
 首先，这个图形比实际中稍微“好一些”，这限制了它的诊断价值。这有两个原因。第一个是page cleaner 工作线程在Performance Schema中不可见(见[bug 79894](http://bugs.mysql.com/bug.php?id=79894))。这个仅限于PFS在5.7中的值，例如，一个尝试只在page cleaner 线程中选择事件，或者监视低并发性，其中清理线程数是整个线程的不可忽略的部分。
 
