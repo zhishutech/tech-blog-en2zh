@@ -1,7 +1,6 @@
->作者：Laurynas Biveinis and Alexey Stroganov  
->发布时间：2016.5.3  
->文章关键字：MySQL
- 
+> 原文 [MySQL 5.7: initial flushing analysis and why Performance Schema data is incomplete](https://www.percona.com/blog/2016/05/03/mysql-5-7-initial-flushing-analysis-and-why-performance-schema-data-is-incomplete/)  
+> 作者：Laurynas Biveinis and Alexey Stroganov   
+
 In this post, we’ll examine why in an initial flushing analysis we find that Performance Schema data is incomplete.  
 本文我们将阐述为什么在初始化的刷新分析中P_S数据不完整的原因。
 
