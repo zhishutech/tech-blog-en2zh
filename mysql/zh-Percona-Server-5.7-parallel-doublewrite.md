@@ -83,7 +83,7 @@ And so is flushing them:
 
 这样刷新他们就：
 
-![Multiple double write buffers)(https://www.percona.com/blog/wp-content/uploads/2016/04/dblw_ps_2.png)
+![Multiple double write buffers](https://www.percona.com/blog/wp-content/uploads/2016/04/dblw_ps_2.png)
 
 This behavior is what we shipped in the 5.7.11-4 release, and the performance results were shown in a previous post. To see how the private doublewrite buffer affects flusher threads, let’s look at isolated data for those threads again.
 
