@@ -34,7 +34,8 @@ The key takeaway from the picture is that LRU batch flushing does not necessaril
 A fix should:  
 
 * Decouple the “LRU list flushing” from “flush list flushing” so that the two can happen in parallel if needed.   
-* Recognize that different buffer pool instances require different amounts of flushing, and remove the synchronization between the instances.   
+* Recognize that different buffer pool instances require different amounts of flushing, and remove the synchronization between the instances.  
+
 建议做如下修复：  
 * 将"LRU列表刷新"从"刷新列表刷新"中解耦，以便这两者在需要时可以并行执行。
 * 认识到不同的缓冲池实例需要不同的刷新量，并删除实例之间的同步。
