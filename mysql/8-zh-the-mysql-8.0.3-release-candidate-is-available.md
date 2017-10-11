@@ -1,28 +1,33 @@
-# The MySQL 8.0.3 Release Candidate is available
-# MySQL8.03 RC 已发布
+原文：http://mysqlserverteam.com/the-mysql-8-0-3-release-candidate-is-available/      
+作者：      
+译者：琅琊阁    
 
-## The MySQL Development team is very happy to announce that MySQL 8.0.3, the first 8.0 Release Candidate (RC1), is now available for download at dev.mysql.com (8.0.3 adds features to 8.0.2, 8.0.1 and 8.0.0). The source code is available at GitHub. You can find the full list of changes and bug fixes in the 8.0.3 Release Notes. Here are the highlights. Enjoy!
-## MySQL的开发团队非常高兴地宣布，第一个8.0候选发布版（RC1）——MySQL的8.0.3现已可在dev.mysql.com下载（相对于8.0.2，8.0.1和8.0.0，8.0.3添加了一些新特性）。源代码可在GitHub获得。您可以在8.0.3发行说明中看到新版本的改变和bug修复的完整列表。下面是新版本的一些亮点。大家赶快体验吧！
+The MySQL 8.0.3 Release Candidate is available
+MySQL8.03 RC 已发布
+
+The MySQL Development team is very happy to announce that MySQL 8.0.3, the first 8.0 Release Candidate (RC1), is now available for download at dev.mysql.com (8.0.3 adds features to 8.0.2, 8.0.1 and 8.0.0). The source code is available at GitHub. You can find the full list of changes and bug fixes in the 8.0.3 Release Notes. Here are the highlights. Enjoy!
+
+MySQL开发团队非常高兴地宣布，第一个8.0 RC版本8.0.3现已可在dev.mysql.com下载（相对于8.0.2，8.0.1和8.0.0，8.0.3添加了一些新特性）。源代码可在GitHub获得。您可以在8.0.3发行说明中看到新版本的改变和bug修复的完整列表。下面是新版本的一些亮点。大家赶快体验吧！
 
 ### Histograms
 Using histogram statistics in the optimizer (WL#9223) – This work by Erik Froseth makes use of histogram statistics in the optimizer.The primary use case for histogram statistics is for calculating the selectivity (filter effect) of predicates of the form “COLUMN operator CONSTANT”. Optimizer statistics are available to the user through the INFORMATION_SCHEMA.COLUMN_STATISTICS table.
 
 ### 直方图
-在优化器中使用直方图统计信息。直方图统计主要用例是计算“列运算符常量”形式的谓词的选择性(过滤效果)。用户可以通过INFORMATION_SCHEMA.COLUMN_STATISTICS表获得优化统计信息。
+在优化器中使用直方图统计信息(WL#9223)。直方图统计主要使用场景是计算“列运算符常量”形式的谓词的选择性(过滤效果)。用户可以通过INFORMATION_SCHEMA.COLUMN_STATISTICS表获得优化统计信息。
 
 ### Force Index
 FORCE INDEX to avoid index dives when possible (WL#6526) – This work by Sreeharsha Ramanavarapu allows the optimizer to skip index dives in queries containing FORCE INDEX. An index dive estimates the number of rows. These estimates are used to decide the choice of index. When FORCE INDEX has been specified, this estimation is irrelevant and can be skipped. This applies to a single-table query during execution if FORCE INDEX applies to a single index, without sub-queries, without fulltext index, without GROUP-BY or DISTINCT clauses, and without ORDER-BY clauses.
 This optimization applies to range queries and ref. queries, for example a range query like: SELECT a1 FROM t1 FORCE INDEX(idx) WHERE a1 > 'b';. In these cases, an EXPLAIN FOR CONNECTION FORMAT=JSON will output "skip_records_in_range_due_to_force": true and an optimizer trace will output "skipped_due_to_force_index".
 
 ### 强制索引
-强制索引是为了避免index dives的，这个功能可以让优化器在包含FORCE INDEX的查询中跳过index dives，优化器根据index dive预估出来的结果集行数来决定选择走哪个索引。当指定FORCE INDEX时，这个预估就变得无关紧要，可以跳过。这个功能适用于单表查询时FORCE INDEX作用于单列索引（不涉及子查询，全文索引，GROUP-BY或DISTINCT，ORDER-BY）的情况。
-此优化应用于范围查询和普通索引查询。例如范围查询，如：SELECT a1 FROM t1 FORCE INDEX（idx）WHERE a1>'b';在这些情况下，EXPLAIN FOR CONNECTION FORMAT = JSON将输出skip_records_in_range_due_to_force”：true，并且optimizer trace将输出“skipped_due_to_force_index”。
+强制索引是为了避免可能发生的index dives(WL#6526)，这个功能可以让优化器在包含FORCE INDEX的查询中跳过index dives，优化器根据index dive预估出来的结果集行数来决定选择走哪个索引。当指定FORCE INDEX时，这个预估就变得无关紧要，可以跳过。这个功能适用于单表查询时FORCE INDEX作用于单个索引，不含子查询、全文索引，GROUP BY、DISTINCT，ORDER BY等多种情况。
+此优化应用于范围查询和普通索引查询。例如范围查询，如：SELECT a1 FROM t1 FORCE INDEX（idx）WHERE a1>'b'。这种情况下，EXPLAIN FOR CONNECTION FORMAT = JSON将输出skip_records_in_range_due_to_force”：true，并且optimizer trace将输出“skipped_due_to_force_index”。
 
 ### Hints
 Hint to temporarily set session variable for current statement (WL#681) – This work by Sergey Glukhov implements a new optimizer hint called SET_VAR. The SET_VAR hint will set the value for a given system variable for the next statement only. Thus the value will be reset to the previous value after the statement is over. SET_VAR covers a subset of sessions variables, since some session variables either do not apply to statements or must be set at an earlier stage of statement execution. Some variable settings have much more meaning being set for a query rather than for a connection, for example you might want to increase sort_buffer_size before doing a large sort query but it is very likely other queries in a session are simple and you are quite OK with default settings for those. E.g.SELECT /*+ SET_VAR(sort_buffer = 16M) */ name FROM people ORDER BY name;
 
 ### Hints
-优化器支持了一个新的hint，在当前会话中使用SET_VAR语法设置临时系统变量，SET_VAR只为下一个语句的给定系统变量设置值。因此，在语句结束后，该变量将被重置为先前的值。 SET_VAR涵盖会话变量的一个子集，因此一些会话变量不适用于该语句，或者必须在语句执行的早期阶段设置。一些变量的调整可能对于查询的意义比连接本身更大，例如您可能希望在进行大型排序查询之前增加sort_buffer_size，但很可能会话中的其他查询很简单，可以使用默认设置。例如：SELECT / * + SET_VAR（sort_buffer = 16M）* / name FROM people ORDER BY name;
+优化器支持了一个新的hint，在当前语句中使用SET_VAR语法临时设置会话变量(WL#681)，SET_VAR只为下一个语句的给定系统变量设置值。因此，在语句结束后，该变量将被重置为先前的值。 SET_VAR涵盖会话变量的一个子集，因此一些会话变量不适用于该语句，或者必须在语句执行的早期阶段设置。一些变量的调整可能对于查询的意义比连接本身更大，例如您可能希望在进行大型排序查询之前增加sort_buffer_size，但很可能会话中的其他查询却很简单，这就可以使用默认设置。用法例如：SELECT / * + SET_VAR（sort_buffer = 16M）* / name FROM people ORDER BY name;
 
 ### Invisible Indexes
 Optimizer switch to see invisible indexes(WL#10891) – This work by Martin Hansson implements an optimizer switch named use invisible indexes which can be turned ON or OFF (default). Optimizer switches can be activated on a per session basis by SET @@optimizer_switch='use_invisible_indexes=on'; This feature supports the use case where a user wants to roll out an index. For example, the user may want to create the index as invisible and then activate the index in a specific session to measure the effect.
@@ -68,7 +73,7 @@ Add Russian collations for utf8mb4 (WL#10753) – This work by Xing Zhang adds R
 Resource Groups (WL#9467) – This work by Thayumanavar Sachithanantha introduces global Resource Groups to MySQL. The purpose of Resource Groups is to decide on the mapping between user/system threads and CPUs. This can be used to split workloads across CPUs to obtain better efficiency and/or performance in some use cases. There are two default groups, one for user threads and one for system threads. Both default groups have 0 priority and no CPU affinity. DevOps/DBAs can create and manage additional Resource Groups with priority and CPU affinity using SQL CREATE/ALTER/DROP RESOURCE GROUP. Information about existing resource groups are found in INFORMATION_SCHEMA.RESOURCE_GROUPS. The user can execute a SQL query on a given resource group by adding the hint /*+ RESOURCE_GROUP(resource_group_name) */  after the initial SELECT, UPDATE, INSERT, REPLACE or DELETE keyword.
 
 ### 资源组
-资源组决定了用户/系统线程和CPU之间的映射用于在CPU之间拆分工作负载，以便在某些用例中获得更好的效率和/或性能。默认有两个资源组，一个用于用户线程，一个用于系统线程。两个默认的资源组优先级都为0，没有CPU关联。DevOps / DBA可以使用SQL CREATE / ALTER / DROP RESOURCE GROUP语句创建和管理具有优先级和CPU亲和力的额外的资源组。有关现有资源组的信息，请参见INFORMATION_SCHEMA.RESOURCE_GROUPS。用户可以通过在SELECT，UPDATE，INSERT，REPLACE或DELETE关键字之后添加hint “/ * + RESOURCE_GROUP（resource_group_name）* / ” 来对给定的资源组执行SQL查询 
+资源组(WL#9467)决定了用户/系统线程和CPU之间的映射用于在CPU之间拆分工作负载，以便在某些用例中获得更好的效率、性能。默认有两个资源组，一个用于用户线程，一个用于系统线程。两个默认的资源组优先级都为0，没有CPU亲缘性。DevOps / DBA可以使用SQL CREATE / ALTER / DROP RESOURCE GROUP语句创建和管理具有优先级和CPU亲和力的额外的资源组。有关现有资源组的信息，请参见INFORMATION_SCHEMA.RESOURCE_GROUPS。用户可以通过在SELECT，UPDATE，INSERT，REPLACE或DELETE关键字之后添加hint “/ * + RESOURCE_GROUP（resource_group_name）* / ” 来对给定的资源组执行SQL查询 
 
 ### Performance Schema
 - Digest Query Sample (WL#9830) – This work by Christopher Powers makes some changes to the EVENTS_STATEMENTS_SUMMARY_BY_DIGEST performance schema table to capture a full example query and some key information about this query example. The column QUERY_SAMPLE_TEXT is added to capture a query sample so that users can run EXPLAIN on a real query and to get a query plan. The column QUERY_SAMPLE_SEEN is added  to capture the query sample timestamp. The column QUERY_SAMPLE_TIMER_WAIT is added to capture the query sample execution time. The columns FIRST_SEEN and LAST_SEEN  have been modified to use fractional seconds.
@@ -130,7 +135,7 @@ Make metadata information transfer optional (WL#8134) – This work by Ramil Kal
 Use CATS for scheduling lock release under high load (WL#10793) – This work by Sunny Bains implements Contention-Aware Transaction Scheduling (CATS) in InnoDB. The original patch was contributed by Jiamin Huang (Bug#84266). CATS helps in reducing the lock sys wait mutex contention by granting locks to transactions that have a higher wait in the dependency graph. The implementation keeps track of how many transactions are waiting for locks that are already acquired by a transaction and, recursively, how many transaction are waiting for those waiting transactions in the wait for graph. The waits-for-edge is “weighted” and this weight is used to order the transactions when scheduling the lock release. The weight is a cumulative weight of the dependencies.
 
 ### 性能
-在InnoDB中实现了竞争事务调度（CATS）。原来的补丁是Jiamin Huang（Bug＃84266）提供的。CATS有助于通过向依赖关系图中具有较高等待的事务授予锁来减少锁等待互斥竞争。实现了记录跟踪事务已经获取的锁的数量有多少，进一步说，就是获取在等待图中等待其他事务的事务数量是多少（这句不确定）。waits-for-edge是“加权”的，这个权重用于在调度锁版本时对事务进行排序。权重是依赖关系的累积权重。
+在InnoDB中实现了竞争意识事务调度（CATS）。原来的补丁是Jiamin Huang（Bug＃84266）提供的。CATS有助于通过向依赖关系图中具有较高等待的事务授予锁来减少锁等待互斥竞争。实现了记录跟踪事务已经获取的锁的数量有多少，进一步说，就是获取在等待图中等待其他事务的事务数量是多少。waits-for-edge是“加权”的，这个权重用于在调度锁版本时对事务进行排序。权重是依赖关系的累积权重。
 
 ### Tablespaces
 - InnoDB: Stop using rollback segments in the system tablespace (WL#10583) – This work by Kevin Lewis changes the minimum value for innodb_undo_tablespaces to 2 and modifies the code that deals with rollback segments in the system tablespace so that it can read, but not create or update rollback segements in an existing system tablespace. In 8.0, rollback segements are moved out of the system tablespace and into UNDO tablespaces.
@@ -157,7 +162,7 @@ Replication of partial JSON updates (WL#2955) – This work by Maria Couceiro im
 - Change GCS/XCOM to have dynamic debugging and tracing (WL#10200) – This work by Alfranio Correia implements dynamical filtering for debugging and tracing messages per sub-system (i.e. GCS, XCOM, etc). Debugging can be turned on by SET GLOBAL group_replication_communication_debug_options='GCS_DEBUG_ALL';. Error, warning and information messages will be output as defined by the server’s error logging component. Debug and trace messages will sent to a file when group replication is in use. By default the file used as debug sink will be named GCS_DEBUG_TRACE and will be placed in the data directory.
 
 ### 组复制
-- 对GCS和XCom线程进行了调整，并在performance schema中自动公开。还要求我们在XCom和GCS中进行进一步的测试，例如互斥体和条件变量以及内存使用。
+- 对GCS和XCom线程进行了调整，并在performance schema metrics中自动显示。还要求我们在XCom和GCS中进行进一步的测试，例如互斥体和条件变量以及内存使用。
 - 对每个子系统（即GCS，XCOM等）进行调试和跟踪消息的动态过滤。可以通过SET GLOBAL group_replication_communication_debug_options ='GCS_DEBUG_ALL';打开调试  。错误，警告信息将按服务的错误记录组件定义输出。使用组复制时，调试和跟踪消息将发送到文件。默认情况下，用作调试接收信息的文件将被命名为GCS_DEBUG_TRACE，并将被放置在数据目录中。
 
 ### Data Dictionary
@@ -243,7 +248,7 @@ Autoscale InnoDB resources based on system resources by default (WL#9193) – Th
 - Deprecate IGNORE_SERVER_IDS when GTID_MODE=ON (WL#10963) – This work by Luis Soares implements a deprecation warning when users try to use CHANGE MASTER TOIGNORE_SERVER_IDS together with GTID_MODE=ON.  When GTID_MODE=ON, any transaction that has been applied is automatically filtered out, so there is no need for IGNORE_SERVER_IDS.
 - Deprecate expire_logs_days (WL#10924) – This work by Neha Kumari adds a deprecation warning when users try to set expire_logs_days. Use the new variable binlog_expire_log_seconds instead. The new variable allows users to set expire time which need not be a multiple of days. This is the better way to set the expiration time and also more flexible, it makes the system variable expire_logs_days superfluous.
 
-### 抵制和废除
+### 不建议使用以及被废除的特性
 - 删除8.0的查询缓存功能，其所有相关的启动选项和配置变量也被删除。为了客户端可以检查并执行相应的操作，现在HAVE_QUERY_CACHE变量将返回NO。SQL_NO_CACHE关键字将继续存在，但将被忽略（在语法中不起作用）。也就是说，例如mysqldump这种工具可以继续正常使用。
 - 将tx_{read_only,isolation}变量重命名为transaction_{read_only,isolation}这样做是为了与命令行格式的-transaction_read_only和-transaction_isolation以及与其它事务相关的系统变量像transaction_alloc_block_size，transaction_allow_batching和transaction_prealloc_size互相统一。
 - 删除了5.7中不推荐使用的旧日志警告选项。改用log_error_verbosity。
