@@ -1,5 +1,9 @@
 # MySQL 查询性能优化：不只是索引
 
+原文：[MySQL Query Performance: Not Just Indexes](https://www.percona.com/blog/2018/01/30/is-indexing-always-the-key-to-mysql-query-performance)
+
+译者：魏新平 
+
 
 在本文当中，我将研究优化索引是否总是提高MySQL查询性能的关键。（剧透一下，不是）
 
