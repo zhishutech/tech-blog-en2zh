@@ -1,20 +1,20 @@
-# Ê¹ÓÃMySQL 5.7µÄÉú³ÉÁÐÀ´Ìá¸ß²éÑ¯ÐÔÄÜ
+# ä½¿ç”¨MySQL 5.7çš„ç”Ÿæˆåˆ—æ¥æé«˜æŸ¥è¯¢æ€§èƒ½
 
-Ô­ÎÄ: Using MySQL 5.7 Generated Columns to Increase Query Performance
+åŽŸæ–‡: Using MySQL 5.7 Generated Columns to Increase Query Performance
 
-×÷Õß: Alexander Rubin
+ä½œè€…: Alexander Rubin
 
-·­Òë: ÐÇÒ«¶Ó@ÖªÊýÌÃ
+ç¿»è¯‘: æ˜Ÿè€€é˜Ÿ@çŸ¥æ•°å ‚
 
-ÔÚÕâÆª²©¿ÍÖÐ£¬ÎÒÃÇ½«¿´¿´ÈçºÎÊ¹ÓÃMySQL 5.7µÄÉú³ÉÁÐ£¨»òÐéÄâÁÐ£©À´Ìá¸ß²éÑ¯ÐÔÄÜ¡£
->In this blog post, we¡¯ll look at ways you can use MySQL 5.7 generated columns (or virtual columns) to improve query performance.
+åœ¨è¿™ç¯‡åšå®¢ä¸­ï¼Œæˆ‘ä»¬å°†çœ‹çœ‹å¦‚ä½•ä½¿ç”¨MySQL 5.7çš„è™šæ‹Ÿåˆ—æ¥æé«˜æŸ¥è¯¢æ€§èƒ½ã€‚
+>In this blog post, weâ€™ll look at ways you can use MySQL 5.7 generated columns (or virtual columns) to improve query performance.
 
-### ËµÃ÷
-´óÔ¼Á½ÄêÇ°£¬ÎÒ·¢±íÁËÒ»¸öÔÚMySQL5.7°æ±¾ÉÏ¹ØÓÚÉú³ÉÁÐ£¨ÐéÄâÁÐ£©µÄ²©¿ÍÎÄÕÂ¡£´ÓÄÇÊ±¿ªÊ¼£¬Ëü³ÉÎªMySQL5.7·¢ÐÐ°æµ±ÖÐ£¬ÎÒ×îÏ²»¶µÄÒ»¸ö¹¦ÄÜµã¡£Ô­ÒòºÜ¼òµ¥£ºÔÚÐéÄâÁÐµÄ°ïÖúÏÂ£¬ÎÒÃÇ¿ÉÒÔ´´½¨fine-grained indexes£¬¿ÉÒÔÏÔÖøÌá¸ß²éÑ¯ÐÔÄÜ¡£ÎÒÒª¸æËßÄãÒ»Ð©¼¼ÇÉ£¬¿ÉÒÔÇ±ÔÚµØ½â¾öÄÇÐ©Ê¹ÓÃÁËGROUP BY ºÍ ORDER BY¶øÂýµÄ±¨±í²éÑ¯¡£
->About two years ago I published a blog post about Generated (Virtual) Columns in MySQL 5.7. Since then, it¡¯s been one of my favorite features in the MySQL 5.7 release. The reason is simple: with the help of virtual columns, we can create fine-grained indexes that can significantly increase query performance. I¡¯m going to show you some tricks that can potentially fix slow reporting queries with GROUP BY and ORDER BY.
+### è¯´æ˜Ž
+å¤§çº¦ä¸¤å¹´å‰ï¼Œæˆ‘å‘è¡¨äº†ä¸€ä¸ªåœ¨MySQL5.7ç‰ˆæœ¬ä¸Šå…³äºŽè™šæ‹Ÿåˆ—çš„æ–‡ç« ã€‚ä»Žé‚£æ—¶å¼€å§‹ï¼Œå®ƒæˆä¸ºMySQL5.7å‘è¡Œç‰ˆå½“ä¸­ï¼Œæˆ‘æœ€å–œæ¬¢çš„ä¸€ä¸ªåŠŸèƒ½ç‚¹ã€‚åŽŸå› å¾ˆç®€å•ï¼šåœ¨è™šæ‹Ÿåˆ—çš„å¸®åŠ©ä¸‹ï¼Œæˆ‘ä»¬å¯ä»¥åˆ›å»ºé—´æŽ¥ç´¢å¼•ï¼ˆfine-grained indexesï¼‰ï¼Œå¯ä»¥æ˜¾è‘—æé«˜æŸ¥è¯¢æ€§èƒ½ã€‚æˆ‘è¦å‘Šè¯‰ä½ ä¸€äº›æŠ€å·§ï¼Œå¯ä»¥æ½œåœ¨åœ°è§£å†³é‚£äº›ä½¿ç”¨äº†GROUP BY å’Œ ORDER BYè€Œæ…¢çš„æŠ¥è¡¨æŸ¥è¯¢ã€‚
+>About two years ago I published a blog post about Generated (Virtual) Columns in MySQL 5.7. Since then, itâ€™s been one of my favorite features in the MySQL 5.7 release. The reason is simple: with the help of virtual columns, we can create fine-grained indexes that can significantly increase query performance. Iâ€™m going to show you some tricks that can potentially fix slow reporting queries with GROUP BY and ORDER BY.
 
-### ÎÊÌâ
-×î½üÎÒÕýÔÚÐ­ÖúÒ»Î»¿Í»§£¬ËûÕýÕõÔúÓÚÕâ¸ö²éÑ¯ÉÏ£º
+### é—®é¢˜
+æœ€è¿‘æˆ‘æ­£åœ¨ååŠ©ä¸€ä½å®¢æˆ·ï¼Œä»–æ­£æŒ£æ‰ŽäºŽè¿™ä¸ªæŸ¥è¯¢ä¸Šï¼š
 >Recently I was working with a customer who was struggling with this query:
 ```sql
 SELECT 
@@ -29,10 +29,10 @@ GROUP BY CONCAT(verb, ' - ', replace(url,'.xml',''))
 HAVING COUNT(*) >= 1 ;
 ```
 
-Õâ¸ö²éÑ¯ÔËÐÐÁËÒ»¸ö¶àÐ¡Ê±£¬²¢ÇÒÊ¹ÓÃºÍ³ÅÂúÁËÕû¸ö tmpÄ¿Â¼£¨ÓÃÓÚÎÄ¼þÅÅÐò£©¡£
+è¿™ä¸ªæŸ¥è¯¢è¿è¡Œäº†ä¸€ä¸ªå¤šå°æ—¶ï¼Œå¹¶ä¸”ä½¿ç”¨å’Œæ’‘æ»¡äº†æ•´ä¸ª tmpç›®å½•ï¼ˆéœ€è¦ç”¨åˆ°ä¸´æ—¶æ–‡ä»¶å®ŒæˆæŽ’åºï¼‰ã€‚
 >The query was running for more than an hour and used all space in the tmp directory (with sort files).
 
-±í½á¹¹ÈçÏÂ:
+è¡¨ç»“æž„å¦‚ä¸‹:
 >The table looked like this:
 ```sql
 CREATE TABLE `ApiLog` (
@@ -59,8 +59,8 @@ KEY `index_timestamp` (`ts`),
 ) ENGINE=InnoDB;
 ```
 
-ÎÒÃÇ·¢ÏÖ²éÑ¯Ã»ÓÐÊ¹ÓÃÊ±¼ä´Á×Ö¶Î£¨¡°TS¡±£©µÄË÷Òý:
->We found out the query was not using an index on the timestamp field (¡°ts¡±):
+æˆ‘ä»¬å‘çŽ°æŸ¥è¯¢æ²¡æœ‰ä½¿ç”¨æ—¶é—´æˆ³å­—æ®µï¼ˆâ€œTSâ€ï¼‰çš„ç´¢å¼•:
+>We found out the query was not using an index on the timestamp field (â€œtsâ€):
 
 ```sql
 mysql> explain SELECT CONCAT(verb, ' - ', replace(url,'.xml','')) AS 'API Call', COUNT(*)  as 'No. of API Calls',  avg(ExecutionTime) as 'Avg. Execution Time', count(distinct AccountId) as 'No. Of Accounts',  count(distinct ParentAccountId) as 'No. Of Parents'  FROM ApiLog  WHERE ts between '2017-10-01 00:00:00' and '2017-12-31 23:59:59'  GROUP BY CONCAT(verb, ' - ', replace(url,'.xml',''))  HAVING COUNT(*)  >= 1G
@@ -80,7 +80,7 @@ possible_keys: ts
 1 row in set, 1 warning (0.00 sec)
 ```
 
-Ô­ÒòºÜ¼òµ¥£º·ûºÏ¹ýÂËÌõ¼þµÄÐÐÊýÌ«´óÁË£¬ÒÔÖÁÓÚÓ°ÏìÒ»´ÎË÷ÒýÉ¨ÃèÉ¨ÃèµÄÐ§ÂÊ£¨»òÕßÖÁÉÙÓÅ»¯Æ÷ÊÇÕâÑùÈÏÎªµÄ£©£º
+åŽŸå› å¾ˆç®€å•ï¼šç¬¦åˆè¿‡æ»¤æ¡ä»¶çš„è¡Œæ•°å¤ªå¤§äº†ï¼Œä»¥è‡³äºŽå½±å“ä¸€æ¬¡ç´¢å¼•æ‰«ææ‰«æçš„æ•ˆçŽ‡ï¼ˆæˆ–è€…è‡³å°‘ä¼˜åŒ–å™¨æ˜¯è¿™æ ·è®¤ä¸ºçš„ï¼‰ï¼š
 >The reason for that is simple: the number of rows matching the filter condition was too large for an index scan to be efficient (or at least the optimizer thinks that):
 
 ```sql
@@ -93,67 +93,67 @@ mysql> select count(*) from ApiLog WHERE ts between '2017-10-01 00:00:00' and '2
 1 row in set (2.68 sec)
 ```
 
-×ÜÐÐÊý£º21998514¡£²éÑ¯ÐèÒªÉ¨ÃèµÄ×ÜÐÐÊýµÄ36%£¨7948800/21998514£©¡£
+æ€»è¡Œæ•°ï¼š21998514ã€‚æŸ¥è¯¢éœ€è¦æ‰«æçš„æ€»è¡Œæ•°çš„36%ï¼ˆ7948800/21998514ï¼‰ï¼ˆæŒ‰ï¼šå½“é¢„ä¼°æ‰«æè¡Œæ•°è¶…è¿‡20% ï½ž 30%æ—¶ï¼Œå³ä¾¿æœ‰ç´¢å¼•ï¼Œä¼˜åŒ–å™¨é€šå¸¸ä¹Ÿä¼šå¼ºåˆ¶è½¬æˆå…¨è¡¨æ‰«æï¼‰ã€‚
 >Total number of rows: 21998514. The query needs to scan 36% of the total rows (7948800 / 21998514).
 
-ÔÚÕâÖÖÇé¿öÏÂ£¬ÎÒÃÇÓÐÐí¶à´¦Àí·½·¨£º
+åœ¨è¿™ç§æƒ…å†µä¸‹ï¼Œæˆ‘ä»¬æœ‰è®¸å¤šå¤„ç†æ–¹æ³•ï¼š
 
-1. ´´½¨Ê±¼ä´ÁÁÐºÍgroup byÁÐµÄÁªºÏË÷Òý
-2. ´´½¨Ò»¸ö¸²¸ÇË÷Òý£¨°üº¬ËùÓÐ²éÑ¯×Ö¶Î£©
-3. ½ö¶ÔgroupÁÐ´´½¨Ë÷Òý
-4. ´´½¨Ë÷ÒýËÉÉ¢Ë÷ÒýÉ¨Ãè
+1. åˆ›å»ºæ—¶é—´æˆ³åˆ—å’Œgroup byåˆ—çš„è”åˆç´¢å¼•ï¼›
+2. åˆ›å»ºä¸€ä¸ªè¦†ç›–ç´¢å¼•ï¼ˆåŒ…å«æ‰€æœ‰æŸ¥è¯¢å­—æ®µï¼‰ï¼›
+3. ä»…å¯¹groupåˆ—åˆ›å»ºç´¢å¼•ï¼›
+4. åˆ›å»ºç´¢å¼•æ¾æ•£ç´¢å¼•æ‰«æã€‚
 >In this case, we have a number of approaches:
 >1. Create a combined index on timestamp column + group by fields
 >2. Create a covered index (including fields that are selected)
 >3. Create an index on just GROUP BY fields
 >4. Create an index for loose index scan
 
-È»¶ø£¬Èç¹ûÎÒÃÇ×ÐÏ¸¹Û²ì²éÑ¯ÖÐ¡°group by¡±²¿·Ö£¬ÎÒÃÇºÜ¿ì¾ÍÒâÊ¶µ½£¬ÕâÐ©·½°¸¶¼²»ÄÜ½â¾öÎÊÌâ¡£ÒÔÏÂÊÇÎÒÃÇµÄgroup by²¿·Ö£º
->However, if we look closer at the ¡°GROUP BY¡± part of the query, we quickly realize that none of those solutions will work. Here is our GROUP BY part:
+ç„¶è€Œï¼Œå¦‚æžœæˆ‘ä»¬ä»”ç»†è§‚å¯ŸæŸ¥è¯¢ä¸­â€œgroup byâ€éƒ¨åˆ†ï¼Œæˆ‘ä»¬å¾ˆå¿«å°±æ„è¯†åˆ°ï¼Œè¿™äº›æ–¹æ¡ˆéƒ½ä¸èƒ½è§£å†³é—®é¢˜ã€‚ä»¥ä¸‹æ˜¯æˆ‘ä»¬çš„group byéƒ¨åˆ†ï¼š
+>However, if we look closer at the â€œGROUP BYâ€ part of the query, we quickly realize that none of those solutions will work. Here is our GROUP BY part:
 ```sql
 GROUP BY CONCAT(verb, ' - ', replace(url,'.xml',''))
 ```
 
-ÕâÀïÓÐÁ½¸öÎÊÌâ£º
+è¿™é‡Œæœ‰ä¸¤ä¸ªé—®é¢˜ï¼š
 
-1. ËüÊÇ¼ÆËãÁÐ£¬ËùÒÔMySQL²»ÄÜÉ¨Ãèverb + urlµÄË÷Òý¡£ËüÊ×ÏÈÐèÒªÁ¬½ÓÁ½¸ö×Ö¶Î£¬È»ºó×é³ÉÁ¬½Ó×Ö·û´®¡£Õâ¾ÍÒâÎ¶×ÅÓÃ²»µ½Ë÷Òý¡£
-2. URL±»¶¨ÒåÎª¡°varchar(3000) COLLATE utf8mb4_unicode_ci NOT NULL¡±£¬²»ÄÜ±»ÍêÈ«Ë÷Òý£¨¼´Ê¹ÔÚÈ«innodb_large_prefix= 1 ²ÎÊýÉèÖÃÏÂ£¬ÕâÊÇUTF8ÆôÓÃÏÂµÄÄ¬ÈÏ²ÎÊý£©¡£ÎÒÃÇÄÜ×ö²¿·ÖË÷Òý£¬Õâ¶Ôgroup byµÄsqlÓÅ»¯²¢Ã»ÓÐÊ²Ã´°ïÖú¡£
+1. å®ƒæ˜¯è®¡ç®—åˆ—ï¼Œæ‰€ä»¥MySQLä¸èƒ½æ‰«æverb + urlçš„ç´¢å¼•ã€‚å®ƒé¦–å…ˆéœ€è¦è¿žæŽ¥ä¸¤ä¸ªå­—æ®µï¼Œç„¶åŽç»„æˆè¿žæŽ¥å­—ç¬¦ä¸²ã€‚è¿™å°±æ„å‘³ç€ç”¨ä¸åˆ°ç´¢å¼•ï¼›
+2. URLè¢«å®šä¹‰ä¸ºâ€œvarchar(3000) COLLATE utf8mb4_unicode_ci NOT NULLâ€ï¼Œä¸èƒ½è¢«å®Œå…¨ç´¢å¼•ï¼ˆå³ä½¿åœ¨å…¨innodb_large_prefix= 1 å‚æ•°è®¾ç½®ä¸‹ï¼Œè¿™æ˜¯UTF8å¯ç”¨ä¸‹çš„é»˜è®¤å‚æ•°ï¼‰ã€‚æˆ‘ä»¬èƒ½åšéƒ¨åˆ†ç´¢å¼•ï¼Œè¿™å¯¹group byçš„sqlä¼˜åŒ–å¹¶æ²¡æœ‰ä»€ä¹ˆå¸®åŠ©ã€‚
 >There are two problems here:
->1. It is using a calculating field, so MySQL can¡¯t just scan the index on verb + url. It needs to first concat two fields, and then group on the concatenated string. That means that the index won¡¯t be used.
->2. The URL is declared as ¡°varchar(3000) COLLATE utf8mb4_unicode_ci NOT NULL¡± and can¡¯t be indexed in full (even with innodb_large_prefix=1  option, which is the default as we have utf8 enabled). We can only do a partial index, which won¡¯t be helpful for GROUP BY optimization.
+>1. It is using a calculating field, so MySQL canâ€™t just scan the index on verb + url. It needs to first concat two fields, and then group on the concatenated string. That means that the index wonâ€™t be used.
+>2. The URL is declared as â€œvarchar(3000) COLLATE utf8mb4_unicode_ci NOT NULLâ€ and canâ€™t be indexed in full (even with innodb_large_prefix=1  option, which is the default as we have utf8 enabled). We can only do a partial index, which wonâ€™t be helpful for GROUP BY optimization.
 
-ÔÚÕâÀï£¬ÎÒ³¢ÊÔÈ¥¶ÔURLÁÐÌí¼ÓÒ»¸öÍêÕûµÄË÷Òý£¬ÔÚinnodb_large_prefix=1²ÎÊýÏÂ£º
->Here, I¡¯m trying to add a full index on the URL with innodb_large_prefix=1:
+åœ¨è¿™é‡Œï¼Œæˆ‘å°è¯•åŽ»å¯¹URLåˆ—æ·»åŠ ä¸€ä¸ªå®Œæ•´çš„ç´¢å¼•ï¼Œåœ¨innodb_large_prefix=1å‚æ•°ä¸‹ï¼š
+>Here, Iâ€™m trying to add a full index on the URL with innodb_large_prefix=1:
 ```sql
 mysql> alter table ApiLog add key verb_url(verb, url);
 ERROR 1071 (42000): Specified key was too long; max key length is 3072 bytes
 ```
 
-àÅ£¬Í¨¹ýÐÞ¸Ä¡°GROUP BY CONCAT(verb, ¡® ¨C ¡®, replace(url,¡¯.xml¡¯,¡±))¡±Îª  ¡°GROUP BY verb, url¡± »á°ïÖú£¨¼ÙÉèÎÒÃÇ°Ñ×Ö¶Î¶¨Òå´Ó varchar£¨3000£©µ÷Ð¡Ò»Ð©£¬²»¹ÜÒµÎñÉÏÔÊÐí»ò²»ÔÊÐí£©¡£È»¶ø£¬Õâ½«¸Ä±ä½á¹û£¬ÒòURL×Ö¶Î²»»áÉ¾³ý .xmlÀ©Õ¹ÃûÁË¡£
->Well, changing the ¡°GROUP BY CONCAT(verb, ¡® ¨C ¡®, replace(url,¡¯.xml¡¯,¡±))¡± to  ¡°GROUP BY verb, url¡± could help (assuming that we somehow trim the field definition from  varchar(3000) to something smaller, which may or may not be possible). However, it will change the results as it will not remove the .xml extension from the URL field.
+å—¯ï¼Œé€šè¿‡ä¿®æ”¹â€œGROUP BY CONCAT(verb, â€˜ â€“ â€˜, replace(url,â€™.xmlâ€™,â€))â€ä¸º  â€œGROUP BY verb, urlâ€ ä¼šå¸®åŠ©ï¼ˆå‡è®¾æˆ‘ä»¬æŠŠå­—æ®µå®šä¹‰ä»Ž varcharï¼ˆ3000ï¼‰è°ƒå°ä¸€äº›ï¼Œä¸ç®¡ä¸šåŠ¡ä¸Šå…è®¸æˆ–ä¸å…è®¸ï¼‰ã€‚ç„¶è€Œï¼Œè¿™å°†æ”¹å˜ç»“æžœï¼Œå› URLå­—æ®µä¸ä¼šåˆ é™¤ .xmlæ‰©å±•åäº†ã€‚
+>Well, changing the â€œGROUP BY CONCAT(verb, â€˜ â€“ â€˜, replace(url,â€™.xmlâ€™,â€))â€ to  â€œGROUP BY verb, urlâ€ could help (assuming that we somehow trim the field definition from  varchar(3000) to something smaller, which may or may not be possible). However, it will change the results as it will not remove the .xml extension from the URL field.
 
-### ½â¾ö·½°¸
-ºÃÏûÏ¢ÊÇ£¬ÔÚMySQL 5.7ÖÐÎÒÃÇÓÐÐéÄâÁÐ¡£ËùÒÔÎÒÃÇ¿ÉÒÔÔÚ¡°CONCAT(verb, ¡® ¨C ¡®, replace(url,¡¯.xml¡¯,¡±))¡±Ö®ÉÏ´´½¨Ò»¸öÐéÄâÁÐ¡£×îºÃµÄ²¿·Ö£ºÎÒÃÇ²»ÐèÒªÖ´ÐÐÒ»×éÍêÕûµÄ×Ö·û´®£¨¿ÉÄÜ´óÓÚ3000×Ö½Ú£©¡£ÎÒÃÇ¿ÉÒÔÊ¹ÓÃMD5¹þÏ££¨»ò¸ü³¤µÄ¹þÏ££¬ÀýÈçSHA1 / SHA2£©×÷Îªgroup byµÄ¶ÔÏó¡£
->The good news is that in MySQL 5.7 we have virtual columns. So we can create a virtual column on top of ¡°CONCAT(verb, ¡® ¨C ¡®, replace(url,¡¯.xml¡¯,¡±))¡±. The best part: we do not have to perform a GROUP BY with the full string (potentially > 3000 bytes). We can use an MD5 hash (or longer hashes, i.e., sha1/sha2) for the purposes of the GROUP BY.
+### è§£å†³æ–¹æ¡ˆ
+å¥½æ¶ˆæ¯æ˜¯ï¼Œåœ¨MySQL 5.7ä¸­æˆ‘ä»¬æœ‰è™šæ‹Ÿåˆ—ã€‚æ‰€ä»¥æˆ‘ä»¬å¯ä»¥åœ¨â€œCONCAT(verb, â€˜ â€“ â€˜, replace(url,â€™.xmlâ€™,â€))â€ä¹‹ä¸Šåˆ›å»ºä¸€ä¸ªè™šæ‹Ÿåˆ—ã€‚æœ€å¥½çš„éƒ¨åˆ†ï¼šæˆ‘ä»¬ä¸éœ€è¦æ‰§è¡Œä¸€ç»„å®Œæ•´çš„å­—ç¬¦ä¸²ï¼ˆå¯èƒ½å¤§äºŽ3000å­—èŠ‚ï¼‰ã€‚æˆ‘ä»¬å¯ä»¥ä½¿ç”¨MD5å“ˆå¸Œï¼ˆæˆ–æ›´é•¿çš„å“ˆå¸Œï¼Œä¾‹å¦‚SHA1 / SHA2ï¼‰ä½œä¸ºgroup byçš„å¯¹è±¡ã€‚
+>The good news is that in MySQL 5.7 we have virtual columns. So we can create a virtual column on top of â€œCONCAT(verb, â€˜ â€“ â€˜, replace(url,â€™.xmlâ€™,â€))â€. The best part: we do not have to perform a GROUP BY with the full string (potentially > 3000 bytes). We can use an MD5 hash (or longer hashes, i.e., sha1/sha2) for the purposes of the GROUP BY.
 
-ÏÂÃæÊÇ½â¾ö·½°¸:
+ä¸‹é¢æ˜¯è§£å†³æ–¹æ¡ˆ:
 >Here is the solution:
 ```sql
 alter table ApiLog add verb_url_hash varbinary(16) GENERATED ALWAYS AS (unhex(md5(CONCAT(verb, ' - ', replace(url,'.xml',''))))) VIRTUAL;
 alter table ApiLog add key (verb_url_hash);
 ```
 
-ËùÒÔÎÒÃÇÔÚÕâÀï×öµÄÊÇ£º
+æ‰€ä»¥æˆ‘ä»¬åœ¨è¿™é‡Œåšçš„æ˜¯ï¼š
 
-1. ÉùÃ÷ÐéÄâÁÐ£¬ÀàÐÍÎªvarbinary£¨16£©
-2. ÔÚCONCAT(verb, ¡® ¨C ¡®, replace(url,¡¯.xml¡¯,¡±)ÉÏ´´½¨ÐéÄâÁÐ£¬²¢ÇÒÊ¹ÓÃMD5¹þÏ£×ª»¯ºóÔÙÊ¹ÓÃunhex×ª»¯32Î»Ê®Áù½øÖÆÎª16Î»¶þ½øÖÆ¡£
-3. ¶ÔÉÏÃæµÄÐéÄâÁÐ´´½¨Ë÷Òý
+1. å£°æ˜Žè™šæ‹Ÿåˆ—ï¼Œç±»åž‹ä¸ºvarbinaryï¼ˆ16ï¼‰ï¼›
+2. åœ¨CONCAT(verb, â€˜ â€“ â€˜, replace(url,â€™.xmlâ€™,â€)ä¸Šåˆ›å»ºè™šæ‹Ÿåˆ—ï¼Œå¹¶ä¸”ä½¿ç”¨MD5å“ˆå¸Œè½¬åŒ–åŽå†ä½¿ç”¨unhexè½¬åŒ–32ä½åå…­è¿›åˆ¶ä¸º16ä½äºŒè¿›åˆ¶ï¼›
+3. å¯¹ä¸Šé¢çš„è™šæ‹Ÿåˆ—åˆ›å»ºç´¢å¼•ã€‚
 >So what we did here is:
 >1. Declared the virtual column with type varbinary(16)
->2. Created a virtual column on CONCAT(verb, ¡® ¨C ¡®, replace(url,¡¯.xml¡¯,¡±), and used an MD5 hash on top plus an unhex to convert 32 hex bytes to 16 binary bytes
+>2. Created a virtual column on CONCAT(verb, â€˜ â€“ â€˜, replace(url,â€™.xmlâ€™,â€), and used an MD5 hash on top plus an unhex to convert 32 hex bytes to 16 binary bytes
 >3. Created and index on top of the virtual column
 
-ÏÖÔÚÎÒÃÇ¿ÉÒÔÐÞ¸Ä²éÑ¯Óï¾ä£¬group by verb_url_hashÁÐ£º
+çŽ°åœ¨æˆ‘ä»¬å¯ä»¥ä¿®æ”¹æŸ¥è¯¢è¯­å¥ï¼Œgroup by verb_url_hashåˆ—ï¼š
 >Now we can change the query and GROUP BY verb_url_hash column:
 ```sql
 mysql> explain SELECT CONCAT(verb, ' - ', replace(url,'.xml',''))
@@ -171,9 +171,9 @@ which is not functionally dependent on columns in GROUP BY clause;
 this is incompatible with sql_mode=only_full_group_by
 ```
 
-MySQL 5.7µÄÑÏ¸ñÄ£Ê½ÊÇÄ¬ÈÏÆôÓÃµÄ£¬ÎÒÃÇ¿ÉÒÔÖ»Õë¶ÔÕâ´Î²éÑ¯ÐÞ¸ÄÒ»ÏÂ¡£
+MySQL 5.7çš„ä¸¥æ ¼æ¨¡å¼æ˜¯é»˜è®¤å¯ç”¨çš„ï¼Œæˆ‘ä»¬å¯ä»¥åªé’ˆå¯¹è¿™æ¬¡æŸ¥è¯¢ä¿®æ”¹ä¸€ä¸‹ã€‚
 
-ÏÖÔÚ½âÊÍ¼Æ»®¿´ÉÏÈ¥ºÃ¶àÁË£º
+çŽ°åœ¨è§£é‡Šè®¡åˆ’çœ‹ä¸ŠåŽ»å¥½å¤šäº†ï¼š
 >MySQL 5.7 has a strict mode enabled by default, which we can change for that query only.
 
 >Now the explain plan looks much better:
@@ -205,11 +205,11 @@ possible_keys: ts,verb_url_hash
 1 row in set, 1 warning (0.00 sec)
 ```
 
-MySQL¿ÉÒÔ±ÜÃâÅÅÐò£¬ËÙ¶È¸ü¿ì¡£Ëü½«×îÖÕ»¹ÊÇÒªÉ¨ÃèËùÓÐ±íµÄË÷ÒýµÄË³Ðò¡£ÏìÓ¦Ê±¼äÃ÷ÏÔ¸üºÃ£º~ 38Ãë¶ø²»ÊÇ>Ò»Ð¡Ê±¡£
+MySQLå¯ä»¥é¿å…æŽ’åºï¼Œé€Ÿåº¦æ›´å¿«ã€‚å®ƒå°†æœ€ç»ˆè¿˜æ˜¯è¦æ‰«ææ‰€æœ‰è¡¨çš„ç´¢å¼•çš„é¡ºåºã€‚å“åº”æ—¶é—´æ˜Žæ˜¾æ›´å¥½ï¼šåªéœ€å¤§æ¦‚38ç§’è€Œä¸å†æ˜¯å¤§äºŽä¸€å°æ—¶ã€‚
 >MySQL will avoid any sorting, which is much faster. It will still have to eventually scan all the table in the order of the index. The response time is significantly better: ~38 seconds as opposed to > an hour.
 
-### ¸²¸ÇË÷Òý
-ÏÖÔÚÎÒÃÇ¿ÉÒÔ³¢ÊÔ×öÒ»¸ö¸²¸ÇË÷Òý£¬Õâ½«Ïàµ±´ó£º
+### è¦†ç›–ç´¢å¼•
+çŽ°åœ¨æˆ‘ä»¬å¯ä»¥å°è¯•åšä¸€ä¸ªè¦†ç›–ç´¢å¼•ï¼Œè¿™å°†ç›¸å½“å¤§ï¼š
 >Now we can attempt to do a covered index, which will be quite large:
 
 ```sql
@@ -218,8 +218,8 @@ Query OK, 0 rows affected (1 min 29.71 sec)
 Records: 0  Duplicates: 0  Warnings: 0
 ```
 
-ÎÒÃÇÌí¼ÓÁËÒ»¸ö¡°¶¯´Ê¡±ºÍ¡°URL¡±£¬ËùÒÔÖ®Ç°ÎÒ²»µÃ²»É¾³ý±í¶¨ÒåµÄCOLLATE utf8mb4_unicode_ci¡£ÏÖÔÚÖ´ÐÐ¼Æ»®±íÃ÷£¬ÎÒÃÇÊ¹ÓÃÁË¸²¸ÇË÷Òý£º
->We had to add a ¡°verb¡± and ¡°url¡±, so beforehand I had to remove the COLLATE utf8mb4_unicode_ci from the table definition. Now explain shows that we¡¯re using the index:
+æˆ‘ä»¬æ·»åŠ äº†ä¸€ä¸ªâ€œverbâ€å’Œâ€œURLâ€ï¼Œæ‰€ä»¥ä¹‹å‰æˆ‘ä¸å¾—ä¸åˆ é™¤è¡¨å®šä¹‰çš„COLLATE utf8mb4_unicode_ciã€‚çŽ°åœ¨æ‰§è¡Œè®¡åˆ’è¡¨æ˜Žï¼Œæˆ‘ä»¬ä½¿ç”¨äº†è¦†ç›–ç´¢å¼•ï¼š
+>We had to add a â€œverbâ€ and â€œurlâ€, so beforehand I had to remove the COLLATE utf8mb4_unicode_ci from the table definition. Now explain shows that weâ€™re using the index:
 ```sql
 mysql> explain SELECT  CONCAT(verb, ' - ', replace(url,'.xml','')) AS 'API Call',  COUNT(*) as 'No. of API Calls',  AVG(ExecutionTime) as 'Avg. Execution Time',  COUNT(distinct AccountId) as 'No. Of Accounts',  COUNT(distinct ParentAccountId) as 'No. Of Parents'  FROM ApiLog  WHERE ts between '2017-10-01 00:00:00' and '2017-12-31 23:59:59'  GROUP BY verb_url_hash  HAVING COUNT(*) >= 1G
 *************************** 1. row ***************************
@@ -237,9 +237,9 @@ possible_keys: ts,verb_url_hash,covered_index
         Extra: Using where; Using index
 1 row in set, 1 warning (0.00 sec)
 ```
-ÏìÓ¦Ê±¼äÏÂ½µµ½~12Ãë£¡µ«ÊÇ£¬Ë÷ÒýµÄ´óÐ¡Ã÷ÏÔµØ±È½överb_url_hashµÄË÷Òý£¨Ã¿¸ö¼ÇÂ¼16×Ö½Ú£©Òª´óµÃ¶à¡£
+å“åº”æ—¶é—´ä¸‹é™åˆ°çº¦12ç§’ï¼ä½†æ˜¯ï¼Œç´¢å¼•çš„å¤§å°æ˜Žæ˜¾åœ°æ¯”ä»…verb_url_hashçš„ç´¢å¼•ï¼ˆæ¯ä¸ªè®°å½•16å­—èŠ‚ï¼‰è¦å¤§å¾—å¤šã€‚
 >The response time dropped to ~12 seconds! However, the index size is significantly larger compared to just verb_url_hash (16 bytes per record).
 
-### ½áÂÛ
-MySQL 5.7µÄÉú³ÉÁÐÌá¹©Ò»¸öÓÐ¼ÛÖµµÄ·½·¨À´Ìá¸ß²éÑ¯ÐÔÄÜ¡£Èç¹ûÄãÓÐÒ»¸öÓÐÈ¤µÄ°¸Àý£¬ÇëÔÚÆÀÂÛÖÐ·ÖÏí¡£
+### ç»“è®º
+MySQL 5.7çš„ç”Ÿæˆåˆ—æä¾›ä¸€ä¸ªæœ‰ä»·å€¼çš„æ–¹æ³•æ¥æé«˜æŸ¥è¯¢æ€§èƒ½ã€‚å¦‚æžœä½ æœ‰ä¸€ä¸ªæœ‰è¶£çš„æ¡ˆä¾‹ï¼Œè¯·åœ¨è¯„è®ºä¸­åˆ†äº«ã€‚
 >MySQL 5.7 generated columns provide a valuable way to improve query performance. If you have an interesting case, please share in the comments.
