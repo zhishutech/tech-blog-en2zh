@@ -108,7 +108,7 @@ mysql> select count(*) from ApiLog WHERE ts between '2017-10-01 00:00:00' and '2
 >3. Create an index on just GROUP BY fields
 >4. Create an index for loose index scan
 
-然而，如果我们仔细观察查询中“group by”部分，我们很快就意识到，这些方案都不能解决问题。以下是我们的group by部分：
+然而，如果我们仔细观察查询中“group by”部分，我们很快就意识到，这些方案都不能解决问题。以下是我们的GROUP BY部分：
 >However, if we look closer at the “GROUP BY” part of the query, we quickly realize that none of those solutions will work. Here is our GROUP BY part:
 ```sql
 GROUP BY CONCAT(verb, ' - ', replace(url,'.xml',''))
@@ -153,7 +153,7 @@ alter table ApiLog add key (verb_url_hash);
 >2. Created a virtual column on CONCAT(verb, ‘ – ‘, replace(url,’.xml’,”), and used an MD5 hash on top plus an unhex to convert 32 hex bytes to 16 binary bytes
 >3. Created and index on top of the virtual column
 
-现在我们可以修改查询语句，group by verb_url_hash列：
+现在我们可以修改查询语句，GROUP BY verb_url_hash列：
 >Now we can change the query and GROUP BY verb_url_hash column:
 ```sql
 mysql> explain SELECT CONCAT(verb, ' - ', replace(url,'.xml',''))
