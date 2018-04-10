@@ -1,0 +1,107 @@
+标题 用了并行复制居然还有延迟
+## 环境描述
+
+前端是ogg 后端是mariadb galera cluster 2个节点，其中一个galera节点挂了一个slave从库。
+
+大概环境是这样的
+
+ogg -->mariadb  galera cluster*2 -->slave。
+
+简单理解就是
+mariadb master-->slave 直接的延迟。（另外一个galera节点没有用到）。
+
+mariadb版本为10.1.14。开启了并行复制 模式为optimistic。线程数为20
+
+在通过业务层面模拟压力测试。发现mariadb master-->slave 延迟大约为1分钟左右。希望MySQL DBA帮整延迟延迟时间最好限制在3秒甚至没有延迟。
+
+
+## mariadb 并行复制概念描述
+
+mariadb并行复制总体来说分为三种:按照顺序并行保守模式（默认模式），乱序并行复制，乐观模式的有序并行复制。
+
+个人理解：
+
+有序方式：并行执行事物，但对commit顺序进行排序。以确保主库上事物提交顺序和从库顺序一致。这种模式的并行复制对应用来说完全透明。
+
+无序方式：并行执行事物，主库的提交的事物顺序可能跟从库的执行顺序不一致。无序方式只能在gtid模式和应用明确指定使用无序的时候才会被使用。无序方式性能是最好，但需要GTID和应用的配合。
+
+乐观并行复制模式：任何DML语句都可以并行运行，这可能会在slave导致冲突，如果二个事物视图修改同一行，检测到这样的冲突。这二个事物，后者会回滚，前者会执行，一旦前着执行，后者事物重新尝试。这种模式会受到```slave_domain_parallel_threads```限制。 官方描述如下
+```Any transactional DML (INSERT/UPDATE/DELETE) is allowed to run in parallel, up to the limit of @@slave_domain_parallel_threads. This may cause conflicts on the slave, eg. if two transactions try to modify the same row. Any such conflict is detected, and the latter of the two transactions is rolled back, allowing the former to proceed. The latter transaction is then re-tried once the former has completed.```
+
+## 问题排查
+
+在业务层模拟压力测试的时候通过dstat， 观察发现 io利用率不超过50%,cpu利用率不超过50%。通过dstat观察发现瓶颈可能不在主从服务的性能上，而是参数的配置。从而进行参数的调整。
+首先是并行复制的模式，把乐观并行复制模式（optimistic）调整为conservative，并行的线程数进行调整为12个。
+本人用sysbench 模拟客户的环境进行压力测试。我的环境为1C2G 版本跟线上环境一致，threads 为200。测试结果
+
+optimistic  | conservative 
+---|---
+5s  | 0s
+14s | 7s
+24s | 15s
+33s | 24s
+42s | 32s
+51s | 41s   
+60s | 49s
+69s | 58s
+78s | 67s
+87s | 75s
+
+发现确实通过对模式的修改，能够缓解主从复制的延迟，但不能彻底的解决。在次测试，通过```pt-ioprofile```发现redo写入占大部分。通过对参数的调整
+```
+sync_binlog = 0
+innodb_flush_log_at_trx_commit =0
+master_info_repository = TABLE
+relay_log_info_repository = TABLE
+log_slave_updates=off
+```
+再次进行测试
+
+conservative_old  | conservative_new 
+---|---
+0s | 2s
+7s | 4s 
+15s | 0s
+24s | 1s
+32s | 0s
+41s | 0s
+49s | 0s
+58s | 2s
+67s | 0s
+75s | 0s
+通过这次调整，发现确实已经几乎没有延迟了。那么为什么调整```innodb_flush_log_at_trx_commit```参数会对主从延迟有影响呢。
+```
+0 每秒刷出一次log，避免性能问题。
+1 在事务提交的时候，强制必须刷出所有log才算提交成功。
+2 在0和1之间自动调整。
+```
+在从库的环境中设置了```innodb_flush_log_at_trx_commit=0```和```sync_binlog=0```，在主从切换的过程中可以在脚本中把这二个参数修改为1，避免在切换主库后，主库宕机导致事物的丢失。
+
+## 问题解决
+
+按照剧本来说，调整了上面的参数，理论上能够解决了复制延迟，然而 然而 实际情况并没有。只是减少了延迟度，并没有根本解决延迟，这时候就很奇怪了，测试环境已经解决了延迟，为什么在实际环境中没有解决呢。，通过解析binlog 发现binlog的事物比没有ogg的环境中要大。后来，我ORACLE的同事协助排查。居然发现是OGG那层进行事物合并，把原来小的事物进行合并成了大事物，然后因为大事物产生了延迟。后来他调整了OGG的参数`GROUPTRANSOP`，终于搞定。
+\#注 GROUPTRANSOPS为以事务传输时，事务合并的单位，减少IO操作；
+
+## 导致延迟的因素
+
+MySQL或者mariadb复制的瓶颈点？
+
+默认的 MySQL的从库 io线程和sql线程 都是单线程。而MySQL的主库是并行写入。
+MySQL的并行复制是增加多个SQL线程，其原理大概是 首先主库必须标记某几个事物是同时提交，也就是last_commited的值是相同的才能在从库上并行回放。从库会有N个线程来等待事物处理。```slave_parallel_threads``` 值建议为8到12个为最佳 如果大于12个，会增加MySQL维护sql线程的成本，反而会影响性能。
+
+是什么导致 MySQL或mariadb复制?
+
+大体分类为 主库的表没有主键 唯一 普通索引 或者有大事物在阻塞。从库的延迟因素有
+从库的性能跟不上主库，主从之间网络延迟,抖动阻塞,从库的参数配置不争取等。
+
+那些参数可以减少主从延迟？
+1.增大从库innodb_buffer_pool_size 可以缓存更多数据 减少由于转换导致的io压力
+2.增大 innodb_log_size innodb_log_files_in_group的值 减少buffer pool的刷盘io 提示写性能
+3.修改参数 innodb_flush_method 为o_DIRECT 提升写入性能
+4.把从库的binlog关闭 或者关闭log_slave_updates
+5.修改参数innodb_flush_log_at_trx_commit 为0或2
+6.如果binlog没关闭 修改sync_binlog 参数为0或者一个很大的值 减少磁盘io压力
+7.如果binlog格式为row 则需要加上主键
+8.binlog格式为statement模式 存在ddl复制 可用讲tmpdir参数改到内存中 比如 dev shm
+9.修改参数 master_info_repository relay_log_info_repository 为table 减少直接io导致的磁盘压力
+
