@@ -12,35 +12,35 @@
 
 We proudly announce General Availability of MySQL 8.0. [Download now!](http://dev.mysql.com/downloads/mysql/) MySQL 8.0 is an extremely exciting new version of the world’s most popular open source database with improvements across the board. Some key enhancements include:
 
-​       **SQL方面**：窗口函数，公共表达式，NOWAIT,SKIPLOCKED,降序索引，分组，常规表达式，字符集，基于性能损耗的优化模式，直方图
+**SQL方面**：窗口函数，公共表达式，NOWAIT, SKIPLOCKED, 降序索引，分组，正则表达式，字符集，CBO优化模式，直方图
 
 1. **SQL** Window functions, Common Table Expressions, NOWAIT and SKIP LOCKED, Descending Indexes, Grouping, Regular Expressions, Character Sets, Cost Model, and Histograms.
 
-   **对JSON的支持**：扩充语法，新功能，增强排序，部分更新性能，基于JSON表的特性，可以使用SQL处理工具处理JSON数据。
+**对JSON的支持**：扩充语法，新函数，排序增强，JSON列部分更新。基于JSON表的特性，可以调用SQL语句处理JSON数据。
 
 2. **JSON** Extended syntax, new functions, improved sorting, and partial updates. With JSON table functions you can use the SQL machinery for JSON data.
 
-   **对地理信息系统的支持**
+**对地理信息系统的支持** 空间引用系统（SRS），包括SRS空间数据类型，空间索引，空间函数
 
 3. **GIS** Geography support. Spatial Reference Systems (SRS), as well as SRS aware spatial datatypes,  spatial indexes,  and spatial functions.
 
-   **可靠性**：DDL语句现在实现原子性和故障恢复（元信息数据被存在了一个基于InnoDB的单独事务性数据字典中）。
+**可靠性**：DDL语句支持原子性和崩溃安全恢复（元信息数据被存在了一个基于InnoDB的单独事务性数据字典中）。
 
 4. **Reliability** DDL statements have become atomic and crash safe, meta-data is stored in a single, transactional data dictionary. Powered by InnoDB! 
 
-   **可观察性**：对P_S,I_S,配置参数，错误日志的记录有了极其重要的增强
+**可观察性**：对P_S,I_S,配置参数，错误日志的记录有显著增强
 
 5. **Observability** Significant enhancements to Performance Schema, Information Schema, Configuration Variables, and Error Logging.
 
-   **可管理性**：远程管理，Undo表空间管理，快速DDL
+**可管理性**：远程管理，Undo表空间管理，快速DDL
 
 6. **Manageability** Remote management, Undo tablespace management, and new instant DDL.
 
-   **安全性**：OpenSSL的改进，新的默认验证方式，SQL角色权限，分解super权限，密码强度等等
+**安全性**：OpenSSL的改进，新的默认验证方式，SQL角色权限，分解super权限，密码强度提升等等
 
 7. **Security** OpenSSL improvements, new default authentication, SQL Roles, breaking up the super privilege, password strength, and more.
-
-   **性能**：InnoDB在读写，带宽限制，业务热数据集中的场景上上有着举足轻重的优点，新增的资源组特性额外给用户一个在特定负载和特定硬件情况下将用户线程映射到指定的CPU上的调节选项
+[yejr]review to here
+**性能**：InnoDB在读写，带宽限制，业务热数据集中的场景上上有着举足轻重的优点，新增的资源组特性额外给用户一个在特定负载和特定硬件情况下将用户线程映射到指定的CPU上的调节选项
 
 8. **Performance** InnoDB is significantly better at Read/Write workloads, IO bound workloads, and high contention “hot spot” workloads. Added Resource Group feature to give users an option optimize for specific workloads on specific hardware by mapping user threads to CPUs.
 
