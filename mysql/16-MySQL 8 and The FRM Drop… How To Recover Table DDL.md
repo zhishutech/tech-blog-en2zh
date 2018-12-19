@@ -483,8 +483,8 @@ As I mentioned before, each DDL updates the SDI, and here we go: I will have all
     
 
 To be clear the second created is NOW (PT20170401) from when I dropped the other partition (PT20170301).
-很清楚的的看到，第二个created 的时间是现在，也就是在我删除分区(PT20170301)时才创建的。
 
+很清楚的的看到，第二个created 的时间是现在，也就是在我删除分区(PT20170301)时才创建的。
 
 Conclusions
 In the end, this solution is definitely more powerful than the FRM files. It will allow us to parse the file and identify the table definition more easily, providing us with much more detail and information.
