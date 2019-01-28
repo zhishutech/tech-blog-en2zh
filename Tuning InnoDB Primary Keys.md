@@ -1,3 +1,8 @@
+>原文：[Tuning InnoDB Primary Keys](https://www.percona.com/blog/2018/07/26/tuning-innodb-primary-keys/)  
+译者：天一阁  
+
+
+
 # Tuning InnoDB Primary Keys
 ### 优化InnoDB主键
 
@@ -359,8 +364,7 @@ We have seen in this post a common strategy used to solve read-intensive workloa
 
 我们在本文中看到了用于解决读密集型负载场景，但是该策略不是始终有用——你必须通过通用模式访问数据。但是在它工作时，你选择好了好的InnoDB主键，你就是这时的英雄！
 
-原文：   
-https://www.percona.com/blog/2018/07/26/tuning-innodb-primary-keys/
+
 
 
 
