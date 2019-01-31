@@ -287,7 +287,7 @@ mysql> select * from friends where user_id = 1234 order by id limit 10;
 
 The rows are often apart by thousands of id values. Although the rows are small, about 30 bytes, an InnoDB page doesn’t contain more than 500 rows. As the application becomes popular, there are more and more users and the table size grows like the square of the number of users. As soon as the table outgrows the InnoDB the buffer pool, MySQL starts to read from disk. Worse case, with nothing cached, we need one read IOP per friend. If the rate of these selects is 300/s and on average, every user has 100 friends, MySQL needs to access up to 30000 pages per second. Clearly, this doesn’t scale for long.
 
-行通常相隔数千个id值，尽管行很小，大约30字节，但InnoDB页不超过500行。随着应用变得流行，用户越来越多，表大小也随着用户呈平方数增长。一旦表超过InnoDB缓冲池，MySQL就开始从磁盘中读取。更糟的是，没有缓存，我们每个朋友都需要一次读IOPS。如果这些查询平均速率是300/s，每个用户有100个朋友，则MySQL需要每秒访问30000个页。显然，这不是一个长期的规划。
+行通常相隔数千个id值，尽管行很小，大约30字节，但InnoDB页不超过500行。随着应用变得流行，用户越来越多，表大小也随着用户呈平方数增长。一旦表超过InnoDB缓冲池，MySQL就开始从磁盘中读取。更糟的是，没有缓存，我们每个朋友都需要一次读IOPS。如果这些查询平均速率是300/s，每个用户有100个朋友，则MySQL需要每秒访问30000个页，显然这无法长期扩展。
 
 We need to determine all the ways the table is accessed. For that, I use pt-query-digest and I raise the limit on the number of query forms returned. Let’s assume I found:
 
@@ -321,7 +321,7 @@ CREATE TABLE `friends` (
 
 Now, the rows are ordered, grouped, by user_id inside the primary key B-Tree but the inserts are in random order. Said otherwise, we slowed down the inserts to the benefit of the select statements on the table. To insert a row, InnoDB potentially needs one disk read to get the page where the new row is going and one disk write to save it back to the disk. Remember in the previous analogy, we needed to take one sheet from the stack, add a name and put it back in place. We also made the table bigger, the InnoDB pages are not as full and the secondary indexes are bigger since the primary key is larger. We also added a secondary index. Now we have less data in the InnoDB buffer pool.
 
-现在，这些行在主键b书内由user_id排序，分组，但插入会按随机的顺序。换句话说，我们放慢了insert速度，使在表上的select语句受益。为了插入一行，InnoDB可能需要一个磁盘读来获取新行所在页和一个磁盘写，以将其保存回磁盘。记住之前的一个类比，我们需要从堆栈中取出一张纸，记下一个名字并将它放回原位。We also made the table bigger, the InnoDB pages are not as full and the secondary indexes are bigger since the primary key is larger. 我们还添加了二级索引，现在我们InnoDB缓冲池中的数据更少了。
+现在，这些行在主键b树内由user_id排序，分组，但插入会按随机的顺序。换句话说，我们放慢了insert速度，使在表上的select语句受益。为了插入一行，InnoDB可能需要一个磁盘读来获取新行所在页和一个磁盘写，以将其保存回磁盘。记住之前的一个类比，我们需要从堆栈中取出一张纸，记下一个名字并将它放回原位。我们还会使得表变得更大，同时InnoDB页填充不够饱满，二级索引更大，因为主键更大。我们还添加了二级索引，现在我们InnoDB缓冲池中的数据更少了。
 
 Shall we panic because there is less data in the buffer pool? No, because now when InnoDB reads a page from disk, instead of getting only a single matching row, it gets up to hundreds of matching rows. The amount of read IOPS is no longer correlated to the number of friends times the rate of select statements. It is now only a factor of the incoming rate of select statements. The impacts of not having enough memory to cache all the table are much reduced. As long as the storage can perform more read IOPS than the rate of select statements, all is fine. With the modified table, the relevant lines of the pt-query-digest output are now:
 
@@ -351,7 +351,7 @@ The above strategy works well when there is a clear access pattern. On top of my
 
 - 游戏排行榜（按用户）
 - 用户偏好（按用户）
-- 消息应用（
+- 消息传递（从哪到哪）
 - 用户对象存储（按用户）
 - 我的收藏（按项目）
 - 对项目的评论（按项目）
