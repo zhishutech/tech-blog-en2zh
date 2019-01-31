@@ -24,7 +24,7 @@ InnoDB is called an index-organized storage engine. An index-organized storage e
 
 InnoDB被称作索引组织引擎。一个索引组织引擎用主键的B树结构存储数据，即表行。这意味着InnoDB强制使用主键。如果一张表没有显式主键，InnoDB添加一个隐式自增的6字节计数器，并使用该隐藏的计数器作为主键。但InnoDB隐式主键存在一些问题。你应该总是在你的表上定义一个显式主键。简言之，你可以通过主键值访问所有的InnoDB行。
 
-An InnoDB secondary index is also a B-Tree. The search key is made of the index columns and the values stored are the primary keys of matching rows. A search by a secondary index very often results in an implicit search by primary key. You can find more information about InnoDB file format in the [documentation](https://dev.mysql.com/doc/internals/en/innodb.html. Jeremy Cole’s [InnoDB Ruby](https://github.com/jeremycole/innodb_ruby) tools are also a great way to learn about InnoDB internals.
+An InnoDB secondary index is also a B-Tree. The search key is made of the index columns and the values stored are the primary keys of matching rows. A search by a secondary index very often results in an implicit search by primary key. You can find more information about InnoDB file format in the [documentation](https://dev.mysql.com/doc/internals/en/innodb.html). Jeremy Cole’s [InnoDB Ruby](https://github.com/jeremycole/innodb_ruby) tools are also a great way to learn about InnoDB internals.
 
 一个InnoDB二级索引也是一个B树。搜索键由索引列组成，而且值存储的值是匹配行的主键。通过二级索引的搜索，通常会引起主键的隐式搜索。你可以在[文档](https://dev.mysql.com/doc/internals/en/innodb.html)中找到有关InnoDB文件格式的更多信息。Jeremy Cole的[InnoDB Ruby](https://github.com/jeremycole/innodb_ruby)工具也是学习InnoDB内部的好方法。
 
