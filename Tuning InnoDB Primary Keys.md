@@ -1,5 +1,8 @@
 >原文：[Tuning InnoDB Primary Keys](https://www.percona.com/blog/2018/07/26/tuning-innodb-primary-keys/)  
-译者：天一阁  
+>发布时间：2018-07-26  
+>作者：Yves Trudeau  
+>文章关键字：InnoDB, Insight for DBAs, MySQL  
+>译者：天一阁  
 
 
 
