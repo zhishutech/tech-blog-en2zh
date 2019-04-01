@@ -1,5 +1,7 @@
 > 原文 https://lefred.be/content/replace-mariadb-10-3-by-mysql-8-0/
+>
 > 作者：[lefred](https://lefred.be/content/author/lefred/)
+>
 > 翻译：无名队
 
 # 为什么要迁移到MySQL8.0？
