@@ -1,14 +1,12 @@
 > 原文 https://lefred.be/content/replace-mariadb-10-3-by-mysql-8-0/
->
 > 作者：[lefred](https://lefred.be/content/author/lefred/)
->
 > 翻译：无名队
 
 # 为什么要迁移到MySQL8.0？
 
 *MySQL 8.0 brings a lot of new features. These features make MySQL database much more secure (like new authentication, secure password policies and management, …) and fault tolerant (new data dictionary), more powerful (new redo log design, less contention, extreme scale out of InnoDB, …), better operation management (SQL Roles, instant add columns), many (but really many!) replication enhancements and native group replication… and finally many cool stuff like the new Document Store, the new MySQL Shell and MySQL InnoDB Cluster that you should already know if you follow this blog (see these [TOP 10 for features for developers](https://lefred.be/content/top-10-mysql-8-0-features-for-developers/) and this [TOP 10 for DBAs & OPS](https://lefred.be/content/top-10-mysql-8-0-features-for-dbas-ops/)).*
 
-MySQL8.0带来了很多新特性。这些新特性使得MySQL数据库更加安全（例如新的认证方式，安全的密码策略和管理方式，...）和容错（新的数据字典）功能更强大（新的redo设计，争用更少，极度扩展InnoDB，…），更好的操作管理（SQL角色，即时添加列 ），很多（其实真的很多）复制增强和本地组复制...最后还有很多很酷的东西例如新的文档，全新的MySQL Shell和MySQL InnoDB cluster，如果你follow了以下这些博客的话你应该已经知道了（[TOP 10 for features for developers](https://lefred.be/content/top-10-mysql-8-0-features-for-developers/) 和[TOP 10 for DBAs & OPS](https://lefred.be/content/top-10-mysql-8-0-features-for-dbas-ops/))）
+MySQL8.0带来了很多新特性。这些新特性使得MySQL数据库更加安全（例如新的认证方式，安全的密码策略和管理方式，...）和容错（新的数据字典）功能更强大（新的redo设计，争用更少，极度扩展InnoDB，…），更好的操作管理（SQL角色，即时添加列 ），很多（其实真的很多）复制增强和本地组复制...最后还有很多很酷的东西例如文档存储，全新的MySQL Shell和MySQL InnoDB cluster，如果你看过以下这些博客的话你应该已经知道了（[TOP 10 for features for developers](https://lefred.be/content/top-10-mysql-8-0-features-for-developers/) 和[TOP 10 for DBAs & OPS](https://lefred.be/content/top-10-mysql-8-0-features-for-dbas-ops/))）
 
 ## 不再是替代品
 
@@ -28,7 +26,7 @@ MySQL8.0带来了很多新特性。这些新特性使得MySQL数据库更加安�
 我们有两种方式：
 
 - 对schema和数据逻辑导出
-- 对schema逻辑导出，使用InnoDB表空间交换导出数据
+- 对schema逻辑导出，使用InnoDB表空间交换处理数据
 
 ## 准备迁移
 
@@ -36,11 +34,11 @@ MySQL8.0带来了很多新特性。这些新特性使得MySQL数据库更加安�
 
 *It’s recommended to avoid to have to deal with `mysql.*` tables are they won’t be compatible, I recommend you to save all that information and import the required entries like users manually. It’s maybe the best time to do some cleanup.*
 
-这是推荐的方式以避免处理`mysql.*`表，因为它们不兼容，我建议你保存所有的信息并且手动导入需要的条目例如用户表。这可能是做一些清理的最佳时机。
+最好不要迁移`mysql.*`这些表，因为它们不兼容，我建议你保存所有的信息并且手动导入需要的条目例如用户表。这可能是做一些清理的最佳时机。
 
 *As we are still using our WordPress site to illustrate this migration. I will dump the `wp` database:*
 
-我们仍然使用我们的WordPress网络来说明这种迁移。我将导出`wp`数据库：
+我们仍然使用我们的WordPress网站来演示迁移。我将导出`wp`数据库：
 
 ```mysql
 mysqldump -B wp> wp.sql
@@ -48,13 +46,13 @@ mysqldump -B wp> wp.sql
 
 > *MariaDB doesn’t provide* `mysqlpump`*, so I used the good old* `mysqldump`*. There was a nice article this morning about MySQL logical dump solutions,* [see it here](https://mydbops.wordpress.com/2019/03/26/mysqldump%E2%80%8B-vs-mysqlpump-vs-mydumper/)*.*
 >
-> MariaDB没有提供`mysqlpump`，所以我们使用了旧的`mysqldump`。这里有一篇很好的关于MySQL逻辑导出解决方案的文章，[请看这里](https://mydbops.wordpress.com/2019/03/26/mysqldump%E2%80%8B-vs-mysqlpump-vs-mydumper/)
+> MariaDB没有提供`mysqlpump`，所以我们使用了`mysqldump`。这里有一篇很好的关于MySQL逻辑导出解决方案的文章，[请看这里](https://mydbops.wordpress.com/2019/03/26/mysqldump%E2%80%8B-vs-mysqlpump-vs-mydumper/)
 
 **方式2**-表结构导出 & InnoDB表传输
 
 *First we take a dump of our database without the data (`-d`):*
 
-首先我们导出数据库结构不带数据[-d]
+首先我们只导出数据库结构
 
 ```mysql
 mysqldump -d -B wp > wp_nodata.sq
@@ -92,7 +90,7 @@ cp wp/wp_comments.cfg ~/wp_innodb/
 
 ## 替换二进制文件/安装MySQL 8.0
 
-*Unlike previous version, if we install MySQL from the Community Repo as seen on this post, MySQL 8.0 won’t be seen as a conflicting replacement for MariaDB 10.x. To avoid any conflict and installation failure, we will replace the MariaDB packages by the MySQL ones using the **swap**command of `yum`:*
+*Unlike previous version, if we install MySQL from the Community Repo as seen on this post, MySQL 8.0 won’t be seen as a conflicting replacement for MariaDB 10.x. To avoid any conflict and installation failure, we will replace the MariaDB packages by the MySQL ones using the **swap** command of `yum`:*
 
 与以前的版本不同，如果我们从社区网站上安装MySQL，MySQL8.0将不会被视为MariaDB 10.x兼容替代品。为了避免任何不兼容和安装失败，我们将使用`yum swap`的命令来将MySQL包替换MariaDB的包
 
@@ -159,7 +157,7 @@ mysql> set password='Complicate1#'
 
 *Now we need to create our database (`wp`), our user and its credentials.*
 
-现在我们需要创建我们的数据库（wp），我们的用户及其凭据
+现在我们需要创建我们的数据库（wp），我们的用户及其密码
 
 > Please, note that the PHP version used by default in CentOS might now be yet compatible with the new default secure authentication plugin, therefor we will have to create our user with the older authentication plugin, `mysql_native_password`. For more info see these posts:
 >
@@ -182,7 +180,7 @@ mysql> create user 'wp'@'127.0.0.1' identified with
 >
 > To not have to change our application, it’s possible to override the policy like this:
 >
-> 默认情况下，这个密码(fred)不会被默认的密码策略通过。为了不修改我们的程序，可以通过这样来覆盖策略：
+> 默认情况下，这个密码(fred)不会被默认的密码策略通过。为了不修改我们的程序，可以通过下面的命令来覆盖策略：
 >
 > ```mysql
 > mysql> set global validate_password.policy=LOW;
