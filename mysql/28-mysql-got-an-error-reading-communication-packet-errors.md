@@ -117,7 +117,4 @@ Along with that, you should also check the network infrastructure sitting betwee
 
 **Conclusion:**In addition to diagnosing communication failure errors, you also need to take into account faulty ethernets, hubs, switches, cables, and so forth which can cause this issue as well. You must replace the hardware itself to properly diagnose these issues.
 
-**结论：**除了诊断通信故障错误之外，还需要考虑网卡、hub、交换机、电缆等因为这些都有可能导致故障。必须更换硬件才能正确诊断这些问题。
-
-
-
+**结论：** 除了诊断通信故障错误之外，还需要考虑网卡、hub、交换机、电缆等因为这些都有可能导致故障。必须更换硬件才能正确诊断这些问题。
